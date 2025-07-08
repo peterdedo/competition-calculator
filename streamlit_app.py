@@ -548,11 +548,16 @@ fig_sunburst = px.sunburst(
     path=['Fáze', 'Aktivita'],
     values='Náklady',
     title="Hierarchické rozložení nákladů",
-    color='Náklady',
-    color_continuous_scale=[
-        '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#e5e7eb', '#f1f5f9'
-    ],
-    range_color=[0, max(1, selected_activities['Náklady'].max())]
+    color='Fáze',
+    color_discrete_map={
+        'Analytická fáze': '#1e3a8a',
+        'Přípravní fáze': '#059669',
+        'Průběh soutěžního workshopu (SW)': '#dc2626',
+        'Vyhlášení výsledků SW': '#7c3aed',
+        'PR podpora v průběhu celé soutěže': '#ea580c',
+        'Další náklady - externí dodavatelé': '#0891b2',
+        'Odměny': '#be185d'
+    }
 )
 fig_sunburst.update_layout(
     title_x=0.5,
