@@ -51,6 +51,16 @@ show_phases = st.sidebar.multiselect("Fáze k zobrazení:", phases, default=phas
 # ------- Data -------
 def load_data():
     data = [
+        # (all previous entries...)
+        {"Fáze":"Přípravní fáze","Aktivita":"Sestavení poroty","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":6,"MP jednotky - CZ":5,"MP+TP jednotky - MEZ":9,"MP+TP jednotky - CZ":8},
+        # Continue with remaining entries following the same structure...
+    ]  # <-- ensure the list is closed here
+    return pd.DataFrame(data)
+def main():
+    df = load_data()
+    # rest of your app logic...
+():
+    data = [
         # Analytická fáze
         {"Fáze":"Analytická fáze","Aktivita":"Sestavení řídící skupiny","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":1,"MP jednotky - CZ":1,"MP+TP jednotky - MEZ":2,"MP+TP jednotky - CZ":2},
         {"Fáze":"Analytická fáze","Aktivita":"Vymezení řešeného území","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":1,"MP jednotky - CZ":1,"MP+TP jednotky - MEZ":2,"MP+TP jednotky - CZ":2},
@@ -69,3 +79,5 @@ def load_data():
         {"Fáze":"Přípravní fáze","Aktivita":"Formulace soutěžních podmínek","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":16,"MP jednotky - CZ":16,"MP+TP jednotky - MEZ":20,"MP+TP jednotky - CZ":20},
         {"Fáze":"Přípravní fáze","Aktivita":"Finalizace a publikace soutěžních podmínek a zadání","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":4,"MP jednotky - CZ":4,"MP+TP jednotky - MEZ":5,"MP+TP jednotky - CZ":5},
         {"Fáze":"Přípravní fáze","Aktivita":"Sestavení poroty","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":6,"MP jednotky - CZ":5,"MP+TP jednotky - MEZ":9,"
+
+         
