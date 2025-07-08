@@ -317,6 +317,7 @@ activities_data = [
 df = pd.DataFrame(activities_data)
 df = df.fillna(0)
 df["Poznámka"] = ""
+df["Vybrané"] = True  # Predvolene všetky aktivity vybrané
 
 # --- Filtrovanie podľa fázy ---
 fazes = df["Fáze"].unique().tolist()
@@ -341,10 +342,11 @@ df_filtered["Množství"] = df_filtered[jednotky_key]
 df_filtered["Cena za jednotku"] = df_filtered[cena_key]
 df_filtered["Subtotal"] = df_filtered["Množství"] * df_filtered["Cena za jednotku"]
 
-# --- Interaktívna tabuľka ---
+# --- Interaktívna tabuľka s výberom ---
 edited_df = st.data_editor(
-    df_filtered[["Fáze", "Aktivita", "Jednotka", "Množství", "Cena za jednotku", "Subtotal", "Poznámka"]],
+    df_filtered[["Vybrané", "Fáze", "Aktivita", "Jednotka", "Množství", "Cena za jednotku", "Subtotal", "Poznámka"]],
     column_config={
+        "Vybrané": st.column_config.CheckboxColumn("Vybrané", help="Zahrnúť aktivitu do výpočtu."),
         "Množství": st.column_config.NumberColumn("Množství", min_value=0, step=0.5, help="Zadajte počet jednotiek."),
         "Cena za jednotku": st.column_config.NumberColumn("Cena za jednotku", min_value=0, step=100, help="Zadajte cenu za jednotku."),
         "Poznámka": st.column_config.TextColumn("Poznámka", help="Vaša poznámka k aktivite.")
@@ -355,8 +357,11 @@ edited_df = st.data_editor(
 )
 edited_df["Subtotal"] = edited_df["Množství"] * edited_df["Cena za jednotku"]
 
+# --- Filter len vybrané aktivity ---
+selected_df = edited_df[edited_df["Vybrané"] == True].copy()
+
 # --- Rýchle sumáre ---
-total = edited_df["Subtotal"].sum()
+total = selected_df["Subtotal"].sum()
 vat_amount = total * 0.21
 total_with_vat = total * 1.21
 
@@ -371,12 +376,11 @@ st.markdown(f"""
 
 # --- Moderné grafy ---
 st.markdown("---")
-st.subheader("Vizualizace nákladů")
+st.subheader("Vizualizace nákladů (len vybrané aktivity)")
 col1, col2 = st.columns(2)
 with col1:
-    # Sunburst graf pre hierarchické rozloženie nákladov
     fig_sunburst = px.sunburst(
-        edited_df,
+        selected_df,
         path=['Fáze', 'Aktivita'],
         values='Subtotal',
         color='Fáze',
@@ -388,11 +392,11 @@ with col1:
     st.plotly_chart(fig_sunburst, use_container_width=True)
 with col2:
     fig_bar = px.bar(
-        edited_df,
+        selected_df,
         x='Aktivita',
         y='Subtotal',
-        color='Fáze',
         title='Náklady podľa aktivít',
+        color='Fáze',
         color_discrete_sequence=px.colors.sequential.Purples,
         hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
     )
@@ -401,11 +405,11 @@ with col2:
 
 # --- Export ---
 st.markdown("---")
-st.subheader("Export výsledků")
+st.subheader("Export výsledků (len vybrané aktivity)")
 col1, col2 = st.columns(2)
 with col1:
     excel_buffer = BytesIO()
-    edited_df.to_excel(excel_buffer, index=False)
+    selected_df.to_excel(excel_buffer, index=False)
     st.download_button(
         label="Stáhnout Excel",
         data=excel_buffer.getvalue(),
