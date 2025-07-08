@@ -447,8 +447,20 @@ edited_df = st.data_editor(
 )
 
 # --- Výpočet upravených hodnot ---
-selected_activities = edited_df[edited_df['Vybrané'] == True]
-total_selected_cost = (selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']).sum()
+selected_activities = edited_df[edited_df['Vybrané'] == True].copy()
+selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
+
+# --- Všetky fázy v pôvodnom poradí ---
+phase_order = [
+    'Analytická fáze',
+    'Přípravní fáze',
+    'Průběh soutěžního workshopu (SW)',
+    'Vyhlášení výsledků SW',
+    'PR podpora v průběhu celé soutěže'
+]
+
+# --- Pridaj chýbajúce fázy s nulovými hodnotami ---
+phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum().reindex(phase_order, fill_value=0)
 
 # --- Grafy ---
 st.markdown("""
@@ -459,16 +471,16 @@ st.markdown("""
 
 col1, col2 = st.columns(2)
 with col1:
-    selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
-    phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum()
     fig_sunburst = px.sunburst(
         names=phase_costs.index,
         parents=[''] * len(phase_costs),
         values=phase_costs.values,
         title="Rozložení nákladů podle fází",
-        color_discrete_sequence=[
-            'rgba(30,58,138,0.95)', 'rgba(59,130,246,0.85)', 'rgba(96,165,250,0.8)', 'rgba(147,197,253,0.7)', 'rgba(219,234,254,0.6)'
-        ]
+        color=phase_costs.values,
+        color_continuous_scale=[
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#e5e7eb'
+        ],
+        range_color=[0, max(1, phase_costs.max())]
     )
     fig_sunburst.update_layout(
         title_x=0.5,
@@ -477,10 +489,7 @@ with col1:
         height=520,
         margin=dict(t=60, l=0, r=0, b=0),
         paper_bgcolor='rgba(255,255,255,0.95)',
-        font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
-        sunburstcolorway=[
-            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
-        ]
+        font=dict(family='Inter, sans-serif', size=16, color='#1e2937')
     )
     fig_sunburst.update_traces(
         hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
@@ -535,7 +544,7 @@ with col1:
         names=phase_costs.index,
         title="Procentuální rozložení nákladů",
         color_discrete_sequence=[
-            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#e5e7eb'
         ]
     )
     fig_pie.update_layout(
@@ -555,9 +564,7 @@ with col1:
     )
     st.plotly_chart(fig_pie, use_container_width=True)
 with col2:
-    phase_order = ['Analytická fáze', 'Přípravní fáze', 'Průběh soutěžního workshopu (SW)', 
-                   'Vyhlášení výsledků SW', 'PR podpora v průběhu celé soutěže']
-    phase_costs_ordered = phase_costs.reindex([p for p in phase_order if p in phase_costs.index])
+    phase_costs_ordered = phase_costs
     fig_line = px.line(
         x=phase_costs_ordered.index,
         y=phase_costs_ordered.values,
