@@ -78,7 +78,7 @@ unit_type = st.sidebar.radio(
     help="Vyberte, či chcete počítať len MP alebo aj transformačné plochy."
 )
 
-# --- Kompletné dáta z tabuľky ---
+# --- Kompletné dáta z tabuľky (opravené) ---
 activities_data = [
     # Analytická fáze
     {"Fáze": "Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Jednotka": "den", "Cena za jednotku": 14000.0,
@@ -264,7 +264,9 @@ activities_data = [
      "Cena MP - MEZ": 0, "Cena MP - CZ": 2250000, "Cena MP+TP - MEZ": 0, "Cena MP+TP - CZ": 2250000}
 ]
 
+# --- Vytvorenie DataFrame s opravou None hodnôt ---
 df = pd.DataFrame(activities_data)
+df = df.fillna(0)  # Nahradenie None hodnôt 0
 df["Poznámka"] = ""
 
 # --- Filtrovanie podľa fázy ---
