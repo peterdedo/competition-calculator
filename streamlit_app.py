@@ -542,74 +542,36 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
-with col1:
-    # Sunburst chart - optimalizovaný
-    fig_sunburst = px.sunburst(
-        names=phase_costs.index,
-        parents=[''] * len(phase_costs),
-        values=phase_costs.values,
-        title="Rozložení nákladů podle fází",
-        color=phase_costs.values,
-        color_continuous_scale=[
-            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#e5e7eb', '#f1f5f9'
-        ],
-        range_color=[0, max(1, phase_costs.max())]
-    )
-    fig_sunburst.update_layout(
-        title_x=0.5,
-        title_font_size=22,
-        title_font_color='#1e3a8a',
-        height=600,
-        margin=dict(t=80, l=0, r=0, b=0),
-        paper_bgcolor='rgba(255,255,255,0.98)',
-        font=dict(family='Inter, sans-serif', size=18, color='#1e2937')
-    )
-    fig_sunburst.update_traces(
-        hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
-        marker=dict(line=dict(width=3, color='white')),
-        insidetextorientation='radial',
-        textfont_size=20,
-        textfont_color='white',
-        textfont_family='Inter, sans-serif'
-    )
-    st.plotly_chart(fig_sunburst, use_container_width=True)
-
-with col2:
-    # Bar chart - optimalizovaný
-    top_activities = selected_activities.nlargest(8, 'Náklady')
-    fig_bar = px.bar(
-        top_activities,
-        x='Aktivita',
-        y='Náklady',
-        title="Top 8 nejnáročnějších aktivit",
-        color='Náklady',
-        color_continuous_scale=[
-            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
-        ],
-        text=top_activities['Náklady'].apply(lambda x: f'{x:,.0f} Kč')
-    )
-    fig_bar.update_layout(
-        title_x=0.5,
-        title_font_size=22,
-        title_font_color='#1e3a8a',
-        height=600,
-        margin=dict(t=80, l=0, r=0, b=0),
-        paper_bgcolor='rgba(255,255,255,0.98)',
-        font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
-        plot_bgcolor='rgba(240,245,255,0.8)',
-        showlegend=False,
-        xaxis_tickangle=-45
-    )
-    fig_bar.update_traces(
-        textposition='outside',
-        marker_line_width=3,
-        marker_line_color='#fff',
-        hovertemplate='<b>%{x}</b><br>Celkové náklady: %{y:,.0f} Kč<extra></extra>',
-        textfont_size=14,
-        textfont_color='#1e3a8a'
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
+# Sunburst chart - hierarchie fázy -> aktivity
+fig_sunburst = px.sunburst(
+    selected_activities,
+    path=['Fáze', 'Aktivita'],
+    values='Náklady',
+    title="Hierarchické rozložení nákladů",
+    color='Náklady',
+    color_continuous_scale=[
+        '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#e5e7eb', '#f1f5f9'
+    ],
+    range_color=[0, max(1, selected_activities['Náklady'].max())]
+)
+fig_sunburst.update_layout(
+    title_x=0.5,
+    title_font_size=22,
+    title_font_color='#1e3a8a',
+    height=700,
+    margin=dict(t=80, l=0, r=0, b=0),
+    paper_bgcolor='rgba(255,255,255,0.98)',
+    font=dict(family='Inter, sans-serif', size=18, color='#1e2937')
+)
+fig_sunburst.update_traces(
+    hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
+    marker=dict(line=dict(width=3, color='white')),
+    insidetextorientation='radial',
+    textfont_size=16,
+    textfont_color='white',
+    textfont_family='Inter, sans-serif'
+)
+st.plotly_chart(fig_sunburst, use_container_width=True)
 
 # --- Export ---
 st.markdown("""
