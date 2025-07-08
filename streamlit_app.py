@@ -4,28 +4,27 @@ import plotly.express as px
 from datetime import datetime
 from io import BytesIO
 
-# --- Moderný dizajn inšpirovaný architektúrou a urbanizmom ---
-st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon=":building_construction:", layout="wide")
+# --- Dizajn inšpirovaný 4ct.eu ---
+st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
 
 st.markdown("""
 <style>
-    /* Architektonické fonty a základné nastavenia */
+    /* 4ct.eu inšpirovaný dizajn */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
+    /* Základné nastavenia */
+    .main {
+        background-color: #ffffff;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Hlavička v štýle 4ct.eu */
     .main-header {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1f4e79 100%);
-        padding: 2rem;
-        border-radius: 0;
-        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+        padding: 3rem 2rem;
+        margin: -2rem -2rem 2rem -2rem;
         color: white;
         text-align: center;
-        font-family: 'Inter', sans-serif;
-        font-size: 1.5rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        border-bottom: 4px solid #e74c3c;
         position: relative;
         overflow: hidden;
     }
@@ -38,39 +37,60 @@ st.markdown("""
         right: 0;
         bottom: 0;
         background: 
-            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%),
-            repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+            linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%),
+            linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.05) 100%);
         pointer-events: none;
     }
     
-    .sticky-summary {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100vw;
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1f4e79 100%);
-        color: white;
-        text-align: center;
-        padding: 1.5rem 0.5rem 1rem 0.5rem;
-        z-index: 9999;
-        font-family: 'Inter', sans-serif;
-        font-size: 1.4rem;
-        box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
-        border-top: 4px solid #e74c3c;
+    .main-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+    
+    .main-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 1rem 0 0 0;
+        font-weight: 400;
+    }
+    
+    /* 4ct.eu logo štýl */
+    .brand-logo {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 1rem;
         backdrop-filter: blur(10px);
     }
     
+    /* Sidebar v štýle 4ct.eu */
+    .sidebar-header {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        padding: 1.5rem;
+        border-radius: 8px;
+        color: white;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    }
+    
+    /* Karty v štýle 4ct.eu */
     .metric-card {
-        background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+        background: white;
         padding: 2rem;
-        border-radius: 0;
-        color: #2c3e50;
+        border-radius: 12px;
+        color: #1f2937;
         text-align: center;
         margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border-left: 6px solid #3498db;
-        font-family: 'Inter', sans-serif;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
     }
@@ -82,25 +102,23 @@ st.markdown("""
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+        background: linear-gradient(90deg, #3b82f6, #1e3a8a);
     }
     
     .metric-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
     
+    /* Fázy v štýle 4ct.eu */
     .phase-header {
-        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         padding: 1.5rem 2rem;
-        border-radius: 0;
+        border-radius: 8px;
         color: white;
         margin: 1.5rem 0 1rem 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 1.3rem;
         font-weight: 600;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        border-left: 8px solid #e74c3c;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
         position: relative;
     }
     
@@ -112,29 +130,18 @@ st.markdown("""
         width: 0;
         height: 0;
         border-style: solid;
-        border-width: 0 0 50px 50px;
-        border-color: transparent transparent #e74c3c transparent;
+        border-width: 0 0 40px 40px;
+        border-color: transparent transparent rgba(255,255,255,0.2) transparent;
     }
     
-    .sidebar-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        padding: 1.5rem;
-        border-radius: 0;
-        color: white;
-        margin-bottom: 1.5rem;
-        text-align: center;
-        font-family: 'Inter', sans-serif;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        border-bottom: 4px solid #3498db;
-    }
-    
+    /* Grafy v štýle 4ct.eu */
     .chart-container {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 0;
+        background: white;
+        border-radius: 12px;
         padding: 2rem;
         margin: 1.5rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border: 2px solid #dee2e6;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
         position: relative;
     }
     
@@ -145,34 +152,34 @@ st.markdown("""
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+        background: linear-gradient(90deg, #3b82f6, #1e3a8a);
     }
     
+    /* Tlačidlá v štýle 4ct.eu */
     .stButton > button {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
         color: white;
         border: none;
-        border-radius: 0;
-        padding: 1rem 2.5rem;
-        font-family: 'Inter', sans-serif;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
         font-weight: 600;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        border-bottom: 4px solid #e74c3c;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        text-transform: none;
+        letter-spacing: 0;
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.3);
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
     }
     
+    /* Progress bar v štýle 4ct.eu */
     .progress-bar {
-        background: linear-gradient(90deg, #3498db 0%, #e74c3c 25%, #f39c12 50%, #27ae60 75%, #9b59b6 100%);
-        height: 8px;
-        border-radius: 0;
+        background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
+        height: 6px;
+        border-radius: 3px;
         margin: 1.5rem 0;
         position: relative;
         overflow: hidden;
@@ -194,75 +201,81 @@ st.markdown("""
         100% { left: 100%; }
     }
     
-    /* Urbanistické mriežky */
-    .grid-pattern {
-        background-image: 
-            linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px);
-        background-size: 20px 20px;
-    }
-    
-    /* Architektonické stĺpce */
-    .column-architectural {
-        background: linear-gradient(180deg, #ecf0f1 0%, #bdc3c7 100%);
-        border-left: 4px solid #3498db;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        position: relative;
-    }
-    
-    .column-architectural::before {
-        content: '';
-        position: absolute;
-        top: 0;
+    /* Sticky summary v štýle 4ct.eu */
+    .sticky-summary {
+        position: fixed;
+        bottom: 0;
         left: 0;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(90deg, #3498db, #e74c3c);
+        width: 100vw;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        text-align: center;
+        padding: 1.5rem 0.5rem 1rem 0.5rem;
+        z-index: 9999;
+        font-weight: 600;
+        font-size: 1.2rem;
+        box-shadow: 0 -4px 20px rgba(59, 130, 246, 0.2);
+        backdrop-filter: blur(10px);
     }
     
-    /* Moderné karty s architektonickými prvkami */
-    .architectural-card {
-        background: white;
-        border-radius: 0;
-        padding: 2rem;
-        margin: 1rem 0;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        border: 2px solid #dee2e6;
-        position: relative;
+    /* Tabuľka v štýle 4ct.eu */
+    .dataframe {
+        border-radius: 8px;
         overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e5e7eb;
     }
     
-    .architectural-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+    .dataframe th {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        color: white;
+        font-weight: 600;
+        padding: 1rem;
     }
     
-    /* Urbanistické ikony a prvky */
-    .urban-icon {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        background: linear-gradient(45deg, #3498db, #e74c3c);
-        margin-right: 8px;
-        border-radius: 2px;
+    .dataframe td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    /* Checkbox štýl */
+    .stCheckbox > label {
+        font-weight: 500;
+        color: #1f2937;
+    }
+    
+    /* Radio buttons štýl */
+    .stRadio > label {
+        font-weight: 500;
+        color: #1f2937;
     }
     
     /* Responsívny dizajn */
     @media (max-width: 768px) {
-        .main-header {
-            font-size: 1.2rem;
-            padding: 1.5rem;
+        .main-header h1 {
+            font-size: 2rem;
+        }
+        
+        .main-header p {
+            font-size: 1rem;
         }
         
         .metric-card {
             padding: 1.5rem;
         }
+    }
+    
+    /* 4ct.eu geometrické prvky */
+    .geometric-pattern {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: 
+            linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%),
+            linear-gradient(-45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+        pointer-events: none;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -271,30 +284,27 @@ st.markdown("""
 <div class="main-header">
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
-    <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 1rem;">
-        <span class="urban-icon"></span>Urbanistické riešenia
-        <span class="urban-icon"></span>Architektonické inovácie
-        <span class="urban-icon"></span>Mestské plánovanie
-    </div>
+    <div class="brand-logo">4CT Platform</div>
+    <div class="geometric-pattern"></div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar s architektonickým dizajnom ---
+# --- Sidebar s 4ct.eu dizajnom ---
 st.sidebar.markdown("""
 <div class="sidebar-header">
-    <h3>Nastavenia projektu</h3>
+    <h3>Nastavení projektu</h3>
 </div>
 """, unsafe_allow_html=True)
 
 variant = st.sidebar.radio(
     "Vyberte variantu:",
     ["Mezinárodní soutěžní workshop", "Soutěžní workshop v češtině"],
-    help="Zvoľte typ soutěže."
+    help="Vyberte typ soutěže."
 )
 unit_type = st.sidebar.radio(
     "Vyberte typ jednotek:",
     ["Počet jednotek (změna MP)", "Počet jednotek (změna MP + transformační plochy)"],
-    help="Vyberte, či chcete počítať len MP alebo aj transformačné plochy."
+    help="Vyberte, zda chcete počítat pouze MP nebo i transformační plochy."
 )
 
 # --- Dáta ---
@@ -400,233 +410,201 @@ activities_data = [
      "MP jednotky - MEZ": 17.0, "MP jednotky - CZ": 13.0, "MP+TP jednotky - MEZ": 17.0, "MP+TP jednotky - CZ": 13.0,
      "Cena MP - MEZ": 238000, "Cena MP - CZ": 182000, "Cena MP+TP - MEZ": 238000, "Cena MP+TP - CZ": 182000},
     
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Průběžná aktualizace webu", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "MP jednotky - MEZ": 3.0, "MP jednotky - CZ": 3.0, "MP+TP jednotky - MEZ": 3.0, "MP+TP jednotky - CZ": 3.0,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 42000, "Cena MP+TP - CZ": 42000},
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Komunikace s médii a veřejností", "Jednotka": "den", "Cena za jednotku": 14000.0,
+     "MP jednotky - MEZ": 8.0, "MP jednotky - CZ": 6.0, "MP+TP jednotky - MEZ": 8.0, "MP+TP jednotky - CZ": 6.0,
+     "Cena MP - MEZ": 112000, "Cena MP - CZ": 84000, "Cena MP+TP - MEZ": 112000, "Cena MP+TP - CZ": 84000},
     
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Soutěžní katalog (struktura, obsah)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "MP jednotky - MEZ": 5.0, "MP jednotky - CZ": 4.0, "MP+TP jednotky - MEZ": 5.0, "MP+TP jednotky - CZ": 4.0,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 70000, "Cena MP+TP - CZ": 56000},
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Organizace veřejných prezentací a diskuzí", "Jednotka": "den", "Cena za jednotku": 14000.0,
+     "MP jednotky - MEZ": 12.0, "MP jednotky - CZ": 10.0, "MP+TP jednotky - MEZ": 12.0, "MP+TP jednotky - CZ": 10.0,
+     "Cena MP - MEZ": 168000, "Cena MP - CZ": 140000, "Cena MP+TP - MEZ": 168000, "Cena MP+TP - CZ": 140000},
     
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Výstava vítězních návrhů (příprava, struktura, obsah, produkční zajištění, instalace)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "MP jednotky - MEZ": 5.0, "MP jednotky - CZ": 5.0, "MP+TP jednotky - MEZ": 5.0, "MP+TP jednotky - CZ": 5.0,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 70000, "Cena MP+TP - CZ": 70000},
-
-    # Další náklady - externí dodavatelé
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Produkcční náklady SW (pronájmy sálů pro SW, tisk, občerstvení, technické zajištění)", "Jednotka": "SW", "Cena za jednotku": 60000.0,
-     "MP jednotky - MEZ": 3.0, "MP jednotky - CZ": 3.0, "MP+TP jednotky - MEZ": 3.0, "MP+TP jednotky - CZ": 3.0,
-     "Cena MP - MEZ": 180000, "Cena MP - CZ": 180000, "Cena MP+TP - MEZ": 180000, "Cena MP+TP - CZ": 180000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Ubytování zahraničních porotců", "Jednotka": "noc", "Cena za jednotku": 5500.0,
-     "MP jednotky - MEZ": 9.0, "MP jednotky - CZ": 0.0, "MP+TP jednotky - MEZ": 9.0, "MP+TP jednotky - CZ": 0.0,
-     "Cena MP - MEZ": 49500, "Cena MP - CZ": 0, "Cena MP+TP - MEZ": 49500, "Cena MP+TP - CZ": 0},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Cestovné pro zahraniční porotce", "Jednotka": "cesta", "Cena za jednotku": 7000.0,
-     "MP jednotky - MEZ": 18.0, "MP jednotky - CZ": 0.0, "MP+TP jednotky - MEZ": 18.0, "MP+TP jednotky - CZ": 0.0,
-     "Cena MP - MEZ": 126000, "Cena MP - CZ": 0, "Cena MP+TP - MEZ": 126000, "Cena MP+TP - CZ": 0},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Překlady čeština/angličtina", "Jednotka": "strana textu", "Cena za jednotku": 500.0,
-     "MP jednotky - MEZ": 450.0, "MP jednotky - CZ": 10.0, "MP+TP jednotky - MEZ": 700.0, "MP+TP jednotky - CZ": 10.0,
-     "Cena MP - MEZ": 225000, "Cena MP - CZ": 5000, "Cena MP+TP - MEZ": 350000, "Cena MP+TP - CZ": 5000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Fotodokumentace celé soutěže (včetně zákresovách fotografií a dokumentace SW)", "Jednotka": "soubor", "Cena za jednotku": 65000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 65000, "Cena MP - CZ": 65000, "Cena MP+TP - MEZ": 65000, "Cena MP+TP - CZ": 65000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba vizuálního stylu grafickým studiem", "Jednotka": "soubor", "Cena za jednotku": 55000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 55000, "Cena MP - CZ": 55000, "Cena MP+TP - MEZ": 55000, "Cena MP+TP - CZ": 55000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba webu soutěže", "Jednotka": "soubor", "Cena za jednotku": 95000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 95000, "Cena MP - CZ": 95000, "Cena MP+TP - MEZ": 95000, "Cena MP+TP - CZ": 95000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafická úprava a sazba soutěžních podmínek a zadání", "Jednotka": "soubor", "Cena za jednotku": 35000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 35000, "Cena MP - CZ": 35000, "Cena MP+TP - MEZ": 35000, "Cena MP+TP - CZ": 35000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování katalogu", "Jednotka": "soubor", "Cena za jednotku": 50000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 50000, "Cena MP - CZ": 50000, "Cena MP+TP - MEZ": 50000, "Cena MP+TP - CZ": 50000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování výstavy", "Jednotka": "soubor", "Cena za jednotku": 70000.0,
-     "MP jednotky - MEZ": 1.0, "MP jednotky - CZ": 1.0, "MP+TP jednotky - MEZ": 1.0, "MP+TP jednotky - CZ": 1.0,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 70000, "Cena MP+TP - CZ": 70000},
-
-    # Odměny
-    {"Fáze": "Odměny", "Aktivita": "Odměny zahraničních porotců", "Jednotka": "odměna celková", "Cena za jednotku": 255000.0,
-     "MP jednotky - MEZ": 3.0, "MP jednotky - CZ": 0.0, "MP+TP jednotky - MEZ": 3.0, "MP+TP jednotky - CZ": 0.0,
-     "Cena MP - MEZ": 765000, "Cena MP - CZ": 0, "Cena MP+TP - MEZ": 765000, "Cena MP+TP - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Odměny českých porotců", "Jednotka": "hod", "Cena za jednotku": 1800.0,
-     "MP jednotky - MEZ": 192.0, "MP jednotky - CZ": 384.0, "MP+TP jednotky - MEZ": 192.0, "MP+TP jednotky - CZ": 384.0,
-     "Cena MP - MEZ": 345600, "Cena MP - CZ": 691200, "Cena MP+TP - MEZ": 345600, "Cena MP+TP - CZ": 691200},
-    
-    {"Fáze": "Odměny", "Aktivita": "Odměny odborníků poroty", "Jednotka": "hod", "Cena za jednotku": 1800.0,
-     "MP jednotky - MEZ": 192.0, "MP jednotky - CZ": 192.0, "MP+TP jednotky - MEZ": 256.0, "MP+TP jednotky - CZ": 256.0,
-     "Cena MP - MEZ": 345600, "Cena MP - CZ": 345600, "Cena MP+TP - MEZ": 460800, "Cena MP+TP - CZ": 460800},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - mezinárodní soutěž", "Jednotka": "odměna pro tým", "Cena za jednotku": 1000000.0,
-     "MP jednotky - MEZ": 5.0, "MP jednotky - CZ": 0.0, "MP+TP jednotky - MEZ": 5.0, "MP+TP jednotky - CZ": 0.0,
-     "Cena MP - MEZ": 5000000, "Cena MP - CZ": 0, "Cena MP+TP - MEZ": 5000000, "Cena MP+TP - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - mezinárodní soutěž", "Jednotka": "odměna pro tým", "Cena za jednotku": 1000000.0,
-     "MP jednotky - MEZ": 3.0, "MP jednotky - CZ": 0.0, "MP+TP jednotky - MEZ": 3.0, "MP+TP jednotky - CZ": 0.0,
-     "Cena MP - MEZ": 3000000, "Cena MP - CZ": 0, "Cena MP+TP - MEZ": 3000000, "Cena MP+TP - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - soutěž v češtině", "Jednotka": "odměna pro tým", "Cena za jednotku": 750000.0,
-     "MP jednotky - MEZ": 0.0, "MP jednotky - CZ": 5.0, "MP+TP jednotky - MEZ": 0.0, "MP+TP jednotky - CZ": 5.0,
-     "Cena MP - MEZ": 0, "Cena MP - CZ": 3750000, "Cena MP+TP - MEZ": 0, "Cena MP+TP - CZ": 3750000},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - soutěž v češtině", "Jednotka": "odměna pro tým", "Cena za jednotku": 750000.0,
-     "MP jednotky - MEZ": 0.0, "MP jednotky - CZ": 3.0, "MP+TP jednotky - MEZ": 0.0, "MP+TP jednotky - CZ": 3.0,
-     "Cena MP - MEZ": 0, "Cena MP - CZ": 2250000, "Cena MP+TP - MEZ": 0, "Cena MP+TP - CZ": 2250000}
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Zpracování a distribuce tiskových materiálů", "Jednotka": "den", "Cena za jednotku": 14000.0,
+     "MP jednotky - MEZ": 6.0, "MP jednotky - CZ": 5.0, "MP+TP jednotky - MEZ": 6.0, "MP+TP jednotky - CZ": 5.0,
+     "Cena MP - MEZ": 84000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 70000}
 ]
 
-# --- DataFrame ---
+# --- Vytvoření DataFrame ---
 df = pd.DataFrame(activities_data)
-df = df.fillna(0)
-df["Poznámka"] = ""
-df["Vybrané"] = True  # Predvolene všetky aktivity vybrané
 
-# --- Filtrovanie podľa fázy ---
-fazes = df["Fáze"].unique().tolist()
-selected_fazes = st.sidebar.multiselect(
-    "Filtrovať fázy:", fazes, default=fazes, help="Vyberte, ktoré fázy chcete zobraziť."
+# --- Výpočet hodnot na základě výběru ---
+if variant == "Mezinárodní soutěžní workshop":
+    variant_suffix = "MEZ"
+else:
+    variant_suffix = "CZ"
+
+if unit_type == "Počet jednotek (změna MP)":
+    unit_col = f"MP jednotky - {variant_suffix}"
+    price_col = f"Cena MP - {variant_suffix}"
+else:
+    unit_col = f"MP+TP jednotky - {variant_suffix}"
+    price_col = f"Cena MP+TP - {variant_suffix}"
+
+# --- Přidání sloupců pro editaci ---
+df['Vybrané'] = True
+df['Upravené množství'] = df[unit_col]
+df['Upravená cena za jednotku'] = df['Cena za jednotku']
+df['Poznámky'] = ''
+
+# --- Filtrování fází ---
+phases = df['Fáze'].unique()
+selected_phases = st.sidebar.multiselect(
+    "Filtrujte fáze:",
+    phases,
+    default=phases,
+    help="Vyberte fáze, které chcete zobrazit."
 )
 
-# --- Reset ---
-if st.sidebar.button("Resetovať všetky hodnoty na default"):
-    st.session_state.clear()
-    st.experimental_rerun()
+# --- Filtrování dat ---
+filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
-# --- Výber kľúčov podľa variantu a jednotiek ---
-vkey = "MEZ" if "Mezinárodní" in variant else "CZ"
-ukey = "MP" if "MP)" in unit_type else "MP+TP"
-jednotky_key = f"{ukey} jednotky - {vkey}"
-cena_key = f"Cena za jednotku"
+# --- Hlavní obsah ---
+col1, col2, col3 = st.columns(3)
 
-# --- Príprava editovateľnej tabuľky ---
-df_filtered = df[df["Fáze"].isin(selected_fazes)].copy()
-df_filtered["Množství"] = df_filtered[jednotky_key]
-df_filtered["Cena za jednotku"] = df_filtered[cena_key]
-df_filtered["Subtotal"] = df_filtered["Množství"] * df_filtered["Cena za jednotku"]
+with col1:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>Celkové náklady</h3>
+        <h2 style="color: #1e3a8a; margin: 0;">{total_cost:,.0f} Kč</h2>
+        <p style="margin: 0; opacity: 0.7;">Celková suma</p>
+    </div>
+    """.format(total_cost=filtered_df[price_col].sum()), unsafe_allow_html=True)
 
-# --- Interaktívna tabuľka s architektonickým dizajnom ---
+with col2:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>Počet aktivit</h3>
+        <h2 style="color: #1e3a8a; margin: 0;">{activity_count}</h2>
+        <p style="margin: 0; opacity: 0.7;">Celkový počet</p>
+    </div>
+    """.format(activity_count=len(filtered_df)), unsafe_allow_html=True)
+
+with col3:
+    st.markdown("""
+    <div class="metric-card">
+        <h3>Průměrná cena</h3>
+        <h2 style="color: #1e3a8a; margin: 0;">{avg_cost:,.0f} Kč</h2>
+        <p style="margin: 0; opacity: 0.7;">Na aktivitu</p>
+    </div>
+    """.format(avg_cost=filtered_df[price_col].mean()), unsafe_allow_html=True)
+
+# --- Progress bar ---
 st.markdown("""
-<div class="architectural-card">
-    <h3>Detailní přehled aktivit</h3>
+<div class="progress-bar"></div>
+""", unsafe_allow_html=True)
+
+# --- Interaktivní tabulka ---
+st.markdown("""
+<div class="phase-header">
+    <h3>Interaktivní tabulka aktivit</h3>
 </div>
 """, unsafe_allow_html=True)
 
+# Vytvoření editovatelné tabulky
 edited_df = st.data_editor(
-    df_filtered[["Vybrané", "Fáze", "Aktivita", "Jednotka", "Množství", "Cena za jednotku", "Subtotal", "Poznámka"]],
-    column_config={
-        "Vybrané": st.column_config.CheckboxColumn("Vybrané", help="Zahrnúť aktivitu do výpočtu."),
-        "Množství": st.column_config.NumberColumn("Množství", min_value=0, step=0.5, help="Zadajte počet jednotiek."),
-        "Cena za jednotku": st.column_config.NumberColumn("Cena za jednotku", min_value=0, step=100, help="Zadajte cenu za jednotku."),
-        "Poznámka": st.column_config.TextColumn("Poznámka", help="Vaša poznámka k aktivite.")
-    },
-    use_container_width=True,
+    filtered_df[['Vybrané', 'Fáze', 'Aktivita', 'Upravené množství', 'Upravená cena za jednotku', 'Poznámky']],
     num_rows="dynamic",
-    key="main_table"
+    use_container_width=True,
+    column_config={
+        "Vybrané": st.column_config.CheckboxColumn("Vybrané", help="Označte aktivitu jako vybranou"),
+        "Fáze": st.column_config.TextColumn("Fáze", disabled=True),
+        "Aktivita": st.column_config.TextColumn("Aktivita", disabled=True),
+        "Upravené množství": st.column_config.NumberColumn("Množství", min_value=0.0, step=0.5),
+        "Upravená cena za jednotku": st.column_config.NumberColumn("Cena za jednotku (Kč)", min_value=0.0, step=1000.0),
+        "Poznámky": st.column_config.TextColumn("Poznámky", max_chars=200)
+    }
 )
-edited_df["Subtotal"] = edited_df["Množství"] * edited_df["Cena za jednotku"]
 
-# --- Filter len vybrané aktivity ---
-selected_df = edited_df[edited_df["Vybrané"] == True].copy()
+# --- Výpočet upravených hodnot ---
+selected_activities = edited_df[edited_df['Vybrané'] == True]
+total_selected_cost = (selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']).sum()
 
-# --- Rýchle sumáre ---
-total = selected_df["Subtotal"].sum()
-vat_amount = total * 0.21
-total_with_vat = total * 1.21
-
-# --- Sticky sumár dole ---
-st.markdown(f"""
-<div class="sticky-summary">
-    <b>Celková suma bez DPH:</b> {total:,.0f} Kč &nbsp; | &nbsp;
-    <b>DPH (21%):</b> {vat_amount:,.0f} Kč &nbsp; | &nbsp;
-    <b>Celková suma s DPH:</b> {total_with_vat:,.0f} Kč
-</div>
-""", unsafe_allow_html=True)
-
-# --- Moderné grafy s architektonickým dizajnom ---
-st.markdown("---")
+# --- Grafy ---
 st.markdown("""
-<div class="architectural-card">
-    <h3>Vizualizace nákladů (len vybrané aktivity)</h3>
+<div class="chart-container">
+    <h3 style="text-align: center; color: #1e3a8a; margin-bottom: 2rem;">Vizualizace nákladů</h3>
 </div>
 """, unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
+
 with col1:
+    # Sunburst chart pro fáze
+    phase_costs = selected_activities.groupby('Fáze')['Upravené množství'].sum()
     fig_sunburst = px.sunburst(
-        selected_df,
-        path=['Fáze', 'Aktivita'],
-        values='Subtotal',
-        color='Fáze',
-        color_discrete_sequence=['#2c3e50', '#34495e', '#3498db', '#2980b9', '#1f4e79', '#e74c3c', '#f39c12'],
-        title='Hierarchické rozloženie nákladov',
-        hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
+        names=phase_costs.index,
+        parents=[''] * len(phase_costs),
+        values=phase_costs.values,
+        title="Rozložení nákladů podle fází",
+        color_discrete_sequence=['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe']
     )
-    fig_sunburst.update_traces(insidetextorientation='radial')
     fig_sunburst.update_layout(
-        font=dict(family="Inter", size=12),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        title_x=0.5,
+        title_font_size=16,
+        title_font_color='#1e3a8a'
     )
     st.plotly_chart(fig_sunburst, use_container_width=True)
+
 with col2:
+    # Bar chart pro top aktivity
+    top_activities = selected_activities.nlargest(10, 'Upravené množství')
     fig_bar = px.bar(
-        selected_df,
+        top_activities,
         x='Aktivita',
-        y='Subtotal',
-        title='Náklady podľa aktivít',
-        color='Fáze',
-        color_discrete_sequence=['#2c3e50', '#34495e', '#3498db', '#2980b9', '#1f4e79', '#e74c3c', '#f39c12'],
-        hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
+        y='Upravené množství',
+        title="Top 10 nejnáročnějších aktivit",
+        color_discrete_sequence=['#3b82f6']
     )
-    fig_bar.update_xaxes(tickangle=45)
     fig_bar.update_layout(
-        font=dict(family="Inter", size=12),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)'
+        title_x=0.5,
+        title_font_size=16,
+        title_font_color='#1e3a8a',
+        xaxis_tickangle=-45
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-# --- Export s architektonickým dizajnom ---
-st.markdown("---")
+# --- Export ---
 st.markdown("""
-<div class="architectural-card">
-    <h3>Export výsledků (len vybrané aktivity)</h3>
+<div class="phase-header">
+    <h3>Export dat</h3>
 </div>
 """, unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
-with col1:
-    excel_buffer = BytesIO()
-    selected_df.to_excel(excel_buffer, index=False)
-    st.download_button(
-        label="Stáhnout Excel",
-        data=excel_buffer.getvalue(),
-        file_name="soutezni_workshop_rozpocet.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-with col2:
-    st.info("Export do PDF bude čoskoro dostupný v ďalšej verzii.")
 
-# --- Footer s architektonickým dizajnom ---
-st.markdown("---")
+with col1:
+    if st.button("Export do Excel", type="primary"):
+        # Vytvoření Excel souboru
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
+            
+            # Přidání shrnutí
+            summary_data = {
+                'Metrika': ['Celkové náklady', 'Počet aktivit', 'Průměrná cena na aktivitu'],
+                'Hodnota': [
+                    f"{total_selected_cost:,.0f} Kč",
+                    len(selected_activities),
+                    f"{total_selected_cost/len(selected_activities):,.0f} Kč"
+                ]
+            }
+            summary_df = pd.DataFrame(summary_data)
+            summary_df.to_excel(writer, sheet_name='Shrnutí', index=False)
+        
+        output.seek(0)
+        st.download_button(
+            label="Stáhnout Excel soubor",
+            data=output.getvalue(),
+            file_name=f"kalkulace_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+with col2:
+    if st.button("Reset hodnot"):
+        st.rerun()
+
+# --- Sticky summary ---
 st.markdown(f"""
-<div style='text-align: center; color: #2c3e50; padding: 2rem; font-family: "Inter", sans-serif;'>
-    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
-        Kalkulátor soutěžního workshopu
-    </div>
-    <div style="font-size: 0.9rem; opacity: 0.7;">
-        Urbanistické riešenia | Architektonické inovácie | Mestské plánovanie
-    </div>
-    <div style="font-size: 0.8rem; opacity: 0.5; margin-top: 0.5rem;">
-        {datetime.now().strftime('%d.%m.%Y %H:%M')}
-    </div>
+<div class="sticky-summary">
+    Celkové náklady: {total_selected_cost:,.0f} Kč | Vybrané aktivity: {len(selected_activities)} | Průměrná cena: {total_selected_cost/len(selected_activities):,.0f} Kč
 </div>
 """, unsafe_allow_html=True)
