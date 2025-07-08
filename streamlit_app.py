@@ -528,39 +528,142 @@ st.markdown("""
 col1, col2 = st.columns(2)
 
 with col1:
-    # Sunburst chart pro fáze
-    phase_costs = selected_activities.groupby('Fáze')['Upravené množství'].sum()
+    # Sunburst chart pro fáze - moderný štýl
+    selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
+    phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum()
+    
     fig_sunburst = px.sunburst(
         names=phase_costs.index,
         parents=[''] * len(phase_costs),
         values=phase_costs.values,
         title="Rozložení nákladů podle fází",
-        color_discrete_sequence=['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe']
+        color_discrete_sequence=[
+            'rgba(30,58,138,0.95)', 'rgba(59,130,246,0.85)', 'rgba(96,165,250,0.8)', 'rgba(147,197,253,0.7)', 'rgba(219,234,254,0.6)'
+        ]
     )
     fig_sunburst.update_layout(
         title_x=0.5,
-        title_font_size=16,
-        title_font_color='#1e3a8a'
+        title_font_size=20,
+        title_font_color='#1e3a8a',
+        height=520,
+        margin=dict(t=60, l=0, r=0, b=0),
+        paper_bgcolor='rgba(255,255,255,0.95)',
+        font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
+        sunburstcolorway=[
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
+        ]
+    )
+    fig_sunburst.update_traces(
+        hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
+        marker=dict(line=dict(width=2, color='white')),
+        insidetextorientation='radial',
+        textfont_size=18
     )
     st.plotly_chart(fig_sunburst, use_container_width=True)
 
 with col2:
-    # Bar chart pro top aktivity
-    top_activities = selected_activities.nlargest(10, 'Upravené množství')
+    # Bar chart pro top aktivity - moderný štýl
+    top_activities = selected_activities.nlargest(10, 'Náklady')
     fig_bar = px.bar(
         top_activities,
         x='Aktivita',
-        y='Upravené množství',
-        title="Top 10 nejnáročnějších aktivit",
-        color_discrete_sequence=['#3b82f6']
+        y='Náklady',
+        title="Top 10 nejnáročnějších aktivit podle nákladů",
+        color='Náklady',
+        color_continuous_scale=[
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
+        ],
+        text=top_activities['Náklady'].apply(lambda x: f'{x:,.0f} Kč')
     )
     fig_bar.update_layout(
         title_x=0.5,
-        title_font_size=16,
+        title_font_size=20,
         title_font_color='#1e3a8a',
-        xaxis_tickangle=-45
+        xaxis_tickangle=-30,
+        height=520,
+        margin=dict(t=60, l=0, r=0, b=0),
+        paper_bgcolor='rgba(255,255,255,0.95)',
+        font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
+        plot_bgcolor='rgba(240,245,255,0.7)',
+        showlegend=False
+    )
+    fig_bar.update_traces(
+        textposition='outside',
+        marker_line_width=2,
+        marker_line_color='#fff',
+        hovertemplate='<b>%{x}</b><br>Celkové náklady: %{y:,.0f} Kč<extra></extra>'
     )
     st.plotly_chart(fig_bar, use_container_width=True)
+
+# --- Dodatečné grafy ---
+st.markdown("""
+<div class="chart-container">
+    <h3 style="text-align: center; color: #1e3a8a; margin-bottom: 2rem;">Detailní analýza</h3>
+</div>
+""", unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    # Pie chart pro rozložení nákladů - moderný štýl
+    fig_pie = px.pie(
+        values=phase_costs.values,
+        names=phase_costs.index,
+        title="Procentuální rozložení nákladů",
+        color_discrete_sequence=[
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'
+        ]
+    )
+    fig_pie.update_layout(
+        title_x=0.5,
+        title_font_size=18,
+        title_font_color='#1e3a8a',
+        height=400,
+        margin=dict(t=60, l=0, r=0, b=0),
+        paper_bgcolor='rgba(255,255,255,0.95)',
+        font=dict(family='Inter, sans-serif', size=16, color='#1e2937')
+    )
+    fig_pie.update_traces(
+        textinfo='percent+label',
+        hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<br>Podíl: %{percent}<extra></extra>',
+        marker=dict(line=dict(width=2, color='white')),
+        pull=[0.05]*len(phase_costs)
+    )
+    st.plotly_chart(fig_pie, use_container_width=True)
+
+with col2:
+    # Line chart pro trend nákladů - moderný štýl
+    phase_order = ['Analytická fáze', 'Přípravní fáze', 'Průběh soutěžního workshopu (SW)', 
+                   'Vyhlášení výsledků SW', 'PR podpora v průběhu celé soutěže']
+    phase_costs_ordered = phase_costs.reindex([p for p in phase_order if p in phase_costs.index])
+    
+    fig_line = px.line(
+        x=phase_costs_ordered.index,
+        y=phase_costs_ordered.values,
+        title="Trend nákladů podle fází",
+        markers=True
+    )
+    fig_line.update_layout(
+        title_x=0.5,
+        title_font_size=18,
+        title_font_color='#1e3a8a',
+        xaxis_title="Fáze",
+        yaxis_title="Náklady (Kč)",
+        height=400,
+        margin=dict(t=60, l=0, r=0, b=0),
+        paper_bgcolor='rgba(255,255,255,0.95)',
+        font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
+        plot_bgcolor='rgba(240,245,255,0.7)'
+    )
+    fig_line.update_traces(
+        line_color='#3b82f6',
+        marker_color='#1e3a8a',
+        marker_size=12,
+        marker_line_width=2,
+        marker_line_color='#fff',
+        hovertemplate='<b>%{x}</b><br>Celkové náklady: %{y:,.0f} Kč<extra></extra>'
+    )
+    st.plotly_chart(fig_line, use_container_width=True)
 
 # --- Export ---
 st.markdown("""
