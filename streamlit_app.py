@@ -406,3 +406,69 @@ if selected_activities:
                 elements.append(Paragraph("Celkové náklady:", styles['Heading2']))
                 elements.append(Spacer(1, 10))
                 summary_data = [
+                    ['Popis', 'Částka (Kč)'],
+                    ['Celková suma bez DPH', f"{total_data['total']:,}"],
+                    ['DPH (21%)', f"{total_data['vat']:,}"],
+                    ['Celková suma s DPH', f"{total_data['total_with_vat']:,}"]
+                ]
+                summary_table = Table(summary_data)
+                summary_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 12),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                elements.append(summary_table)
+                elements.append(Spacer(1, 20))
+                elements.append(Paragraph("Detailní přehled aktivit:", styles['Heading2']))
+                elements.append(Spacer(1, 10))
+                table_data = [['Fáze', 'Aktivita', 'Jednotka', 'Množství', 'Cena za jednotku', 'Subtotal']]
+                for _, row in df_data.iterrows():
+                    table_data.append([
+                        row['Fáze'],
+                        row['Aktivita'],
+                        row['Jednotka'],
+                        str(row['Množství']),
+                        f"{row['Cena za jednotku']:,}",
+                        f"{row['Subtotal']:,}"
+                    ])
+                max_rows_per_page = 25
+                for i in range(0, len(table_data), max_rows_per_page):
+                    page_data = table_data[i:i + max_rows_per_page]
+                    if i > 0:
+                        elements.append(Spacer(1, 20))
+                    table = Table(page_data)
+                    table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 10),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                        ('FONTSIZE', (0, 1), (-1, -1), 8),
+                        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                    ]))
+                    elements.append(table)
+                doc.build(elements)
+                buffer.seek(0)
+                return buffer
+            total_data = {
+                'total': total,
+                'vat': vat_amount,
+                'total_with_vat': total_with_vat
+            }
+            pdf_buffer = generate_pdf_report(df_selected, total_data)
+            b64_pdf = base64.b64encode(pdf_buffer.getvalue()).decode()
+            href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="soutezni_workshop_rozpocet.pdf">Stáhnout PDF report</a>'
+            st.markdown(href, unsafe_allow_html=True)
+            st.success("PDF report byl úspěšně vygenerován!")
+
+# Footer
+st.markdown("---")
+st.markdown(f"<div style='text-align: center; color: #666; padding: 2rem;'>Kalkulátor soutěžního workshopu | {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>", unsafe_allow_html=True) 
