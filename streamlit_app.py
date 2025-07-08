@@ -110,7 +110,6 @@ st.markdown("""
 <div class="main-header">
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
-    <div style="font-size: 0.9rem; opacity: 0.9;">✨ Optimalizováno pre najlepšie UX</div>
 </div>
 """, unsafe_allow_html=True)
 
