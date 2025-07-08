@@ -25,3 +25,11 @@ git remote add origin https://github.com/YOUR_USERNAME/REPO_NAME.git
 # Nahrajte kód na GitHub
 git branch -M main
 git push -u origin main
+
+# V priečinku projektu
+cd /Users/administrator/Documents/Cursor/4ct_project
+
+# Commit zmeny
+git add streamlit_app.py
+git commit -m "Create new clean streamlit app"
+git push
