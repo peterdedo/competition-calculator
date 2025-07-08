@@ -4,187 +4,155 @@ import plotly.express as px
 from datetime import datetime
 from io import BytesIO
 
-# --- Dizajn inšpirovaný 4ct.eu ---
+# --- Najmodernejší vizuál a UX podľa svetových štandardov ---
 st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
 
 st.markdown("""
 <style>
-    /* 4ct.eu inšpirovaný dizajn */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
-    /* Základné nastavenia */
-    .main {
-        background-color: #ffffff;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Hlavička v štýle 4ct.eu */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+    html, body, .main { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important; font-family: 'Inter', sans-serif; }
     .main-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
-        padding: 3rem 2rem;
-        margin: -2rem -2rem 2rem -2rem;
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 40%, #60a5fa 100%);
+        padding: 4rem 2rem 2.5rem 2rem;
+        margin: -2rem -2rem 2.5rem -2rem;
         color: white;
         text-align: center;
+        border-radius: 0 0 2.5rem 2.5rem;
+        box-shadow: 0 12px 48px rgba(30,58,138,0.18);
         position: relative;
         overflow: hidden;
     }
-    
-    .main-header::before {
-        content: '';
+    .main-header h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.03em;
+        text-shadow: 0 2px 16px rgba(30,58,138,0.12);
+    }
+    .main-header p {
+        font-size: 1.25rem;
+        font-weight: 400;
+        opacity: 0.95;
+        margin-bottom: 0.5rem;
+    }
+    .main-header .brand-logo {
+        display: inline-block;
+        background: rgba(255,255,255,0.13);
+        padding: 0.5rem 1.5rem;
+        border-radius: 1rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        letter-spacing: 0.08em;
+        box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+    }
+    .main-header .hero-bg {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: 
-            linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%),
-            linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.05) 100%);
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect fill="none"/><circle cx="80" cy="80" r="60" fill="%233b82f6" fill-opacity="0.08"/><circle cx="90%" cy="30" r="80" fill="%231e3a8a" fill-opacity="0.06"/><rect x="60%" y="60%" width="120" height="120" rx="30" fill="%2360a5fa" fill-opacity="0.07"/></svg>');
+        z-index: 0;
         pointer-events: none;
     }
-    
-    .main-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 0;
-        letter-spacing: -0.02em;
-    }
-    
-    .main-header p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin: 1rem 0 0 0;
-        font-weight: 400;
-    }
-    
-    /* 4ct.eu logo štýl */
-    .brand-logo {
-        display: inline-block;
-        background: rgba(255,255,255,0.2);
-        padding: 0.5rem 1rem;
-        border-radius: 4px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-top: 1rem;
-        backdrop-filter: blur(10px);
-    }
-    
-    /* Sidebar v štýle 4ct.eu */
     .sidebar-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        padding: 1.5rem;
-        border-radius: 8px;
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        padding: 2rem 1rem 1.5rem 1rem;
+        border-radius: 1.5rem;
         color: white;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
         text-align: center;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 24px rgba(30,58,138,0.10);
+        position: sticky;
+        top: 1.5rem;
+        z-index: 10;
     }
-    
-    /* Karty v štýle 4ct.eu */
+    .stRadio, .stMultiSelect, .stButton, .stCheckbox {
+        font-size: 1.1rem !important;
+    }
     .metric-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 12px;
-        color: #1f2937;
+        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
+        padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+        border-radius: 1.5rem;
+        color: #1e2937;
         text-align: center;
         margin: 1rem 0;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        border: 1.5px solid #e5e7eb;
         position: relative;
         overflow: hidden;
+        transition: box-shadow 0.2s, transform 0.2s;
     }
-    
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #3b82f6, #1e3a8a);
-    }
-    
     .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        box-shadow: 0 8px 32px rgba(30,58,138,0.16);
+        transform: translateY(-2px) scale(1.01);
     }
-    
-    /* Fázy v štýle 4ct.eu */
+    .metric-card h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #3b82f6;
+        margin-bottom: 0.2rem;
+    }
+    .metric-card h2 {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #1e3a8a;
+        margin: 0.2rem 0 0.1rem 0;
+        letter-spacing: -0.02em;
+    }
+    .metric-card p {
+        font-size: 1rem;
+        opacity: 0.7;
+        margin: 0;
+    }
     .phase-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
         padding: 1.5rem 2rem;
-        border-radius: 8px;
+        border-radius: 1.2rem;
         color: white;
-        margin: 1.5rem 0 1rem 0;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        margin: 2rem 0 1.2rem 0;
+        font-weight: 700;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 20px rgba(30,58,138,0.10);
+        border-left: 8px solid #60a5fa;
         position: relative;
     }
-    
-    .phase-header::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 0;
-        height: 0;
-        border-style: solid;
-        border-width: 0 0 40px 40px;
-        border-color: transparent transparent rgba(255,255,255,0.2) transparent;
-    }
-    
-    /* Grafy v štýle 4ct.eu */
     .chart-container {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        margin: 1.5rem 0;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e5e7eb;
+        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
+        border-radius: 1.5rem;
+        padding: 2.5rem 2rem 2rem 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        border: 1.5px solid #e5e7eb;
         position: relative;
     }
-    
-    .chart-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #3b82f6, #1e3a8a);
-    }
-    
-    /* Tlačidlá v štýle 4ct.eu */
     .stButton > button {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        border-radius: 1rem;
+        padding: 1rem 2.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        box-shadow: 0 4px 20px rgba(30,58,138,0.10);
         text-transform: none;
-        letter-spacing: 0;
+        letter-spacing: 0.02em;
     }
-    
     .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 25px rgba(59, 130, 246, 0.3);
-        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        transform: translateY(-2px) scale(1.03);
+        box-shadow: 0 8px 32px rgba(30,58,138,0.18);
+        background: linear-gradient(120deg, #2563eb 0%, #60a5fa 100%);
     }
-    
-    /* Progress bar v štýle 4ct.eu */
     .progress-bar {
         background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
-        height: 6px;
-        border-radius: 3px;
-        margin: 1.5rem 0;
+        height: 8px;
+        border-radius: 4px;
+        margin: 2rem 0 1.5rem 0;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 2px 8px rgba(30,58,138,0.10);
     }
-    
     .progress-bar::after {
         content: '';
         position: absolute;
@@ -195,104 +163,72 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
         animation: shimmer 2s infinite;
     }
-    
     @keyframes shimmer {
         0% { left: -100%; }
         100% { left: 100%; }
     }
-    
-    /* Sticky summary v štýle 4ct.eu */
     .sticky-summary {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100vw;
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
         color: white;
         text-align: center;
-        padding: 1.5rem 0.5rem 1rem 0.5rem;
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
         z-index: 9999;
-        font-weight: 600;
-        font-size: 1.2rem;
-        box-shadow: 0 -4px 20px rgba(59, 130, 246, 0.2);
+        font-weight: 700;
+        font-size: 1.25rem;
+        box-shadow: 0 -4px 24px rgba(30,58,138,0.12);
+        border-top-left-radius: 1.5rem;
+        border-top-right-radius: 1.5rem;
+        letter-spacing: 0.02em;
         backdrop-filter: blur(10px);
     }
-    
-    /* Tabuľka v štýle 4ct.eu */
     .dataframe {
-        border-radius: 8px;
+        border-radius: 1.2rem;
         overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        border: 1.5px solid #e5e7eb;
     }
-    
     .dataframe th {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
         color: white;
-        font-weight: 600;
+        font-weight: 700;
         padding: 1rem;
+        font-size: 1.1rem;
     }
-    
     .dataframe td {
-        padding: 0.75rem;
+        padding: 0.85rem;
         border-bottom: 1px solid #e5e7eb;
+        font-size: 1.05rem;
     }
-    
-    /* Checkbox štýl */
-    .stCheckbox > label {
-        font-weight: 500;
-        color: #1f2937;
+    .stCheckbox > label, .stRadio > label {
+        font-weight: 600;
+        color: #1e2937;
     }
-    
-    /* Radio buttons štýl */
-    .stRadio > label {
-        font-weight: 500;
-        color: #1f2937;
-    }
-    
-    /* Responsívny dizajn */
-    @media (max-width: 768px) {
-        .main-header h1 {
-            font-size: 2rem;
-        }
-        
-        .main-header p {
-            font-size: 1rem;
-        }
-        
-        .metric-card {
-            padding: 1.5rem;
-        }
-    }
-    
-    /* 4ct.eu geometrické prvky */
-    .geometric-pattern {
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 100px;
-        height: 100px;
-        background: 
-            linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%),
-            linear-gradient(-45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
-        pointer-events: none;
+    @media (max-width: 900px) {
+        .main-header h1 { font-size: 2.1rem; }
+        .main-header p { font-size: 1rem; }
+        .metric-card { padding: 1.2rem; }
+        .chart-container { padding: 1.2rem; }
     }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="main-header">
+    <div class="hero-bg"></div>
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
     <div class="brand-logo">4CT Platform</div>
-    <div class="geometric-pattern"></div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar s 4ct.eu dizajnom ---
+# --- Sidebar ---
 st.sidebar.markdown("""
 <div class="sidebar-header">
-    <h3>Nastavení projektu</h3>
+    <span style="font-size:1.5rem;vertical-align:middle;">⚙️</span> Nastavení projektu
 </div>
 """, unsafe_allow_html=True)
 
@@ -457,35 +393,32 @@ selected_phases = st.sidebar.multiselect(
 # --- Filtrování dat ---
 filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
-# --- Hlavní obsah ---
+# --- KPI cards ---
 col1, col2, col3 = st.columns(3)
-
 with col1:
-    st.markdown("""
+    st.markdown(f"""
     <div class="metric-card">
         <h3>Celkové náklady</h3>
-        <h2 style="color: #1e3a8a; margin: 0;">{total_cost:,.0f} Kč</h2>
-        <p style="margin: 0; opacity: 0.7;">Celková suma</p>
+        <h2>{filtered_df[price_col].sum():,.0f} Kč</h2>
+        <p>Celková suma</p>
     </div>
-    """.format(total_cost=filtered_df[price_col].sum()), unsafe_allow_html=True)
-
+    """, unsafe_allow_html=True)
 with col2:
-    st.markdown("""
+    st.markdown(f"""
     <div class="metric-card">
         <h3>Počet aktivit</h3>
-        <h2 style="color: #1e3a8a; margin: 0;">{activity_count}</h2>
-        <p style="margin: 0; opacity: 0.7;">Celkový počet</p>
+        <h2>{len(filtered_df)}</h2>
+        <p>Celkový počet</p>
     </div>
-    """.format(activity_count=len(filtered_df)), unsafe_allow_html=True)
-
+    """, unsafe_allow_html=True)
 with col3:
-    st.markdown("""
+    st.markdown(f"""
     <div class="metric-card">
         <h3>Průměrná cena</h3>
-        <h2 style="color: #1e3a8a; margin: 0;">{avg_cost:,.0f} Kč</h2>
-        <p style="margin: 0; opacity: 0.7;">Na aktivitu</p>
+        <h2>{filtered_df[price_col].mean():,.0f} Kč</h2>
+        <p>Na aktivitu</p>
     </div>
-    """.format(avg_cost=filtered_df[price_col].mean()), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # --- Progress bar ---
 st.markdown("""
@@ -499,7 +432,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Vytvoření editovatelné tabulky
 edited_df = st.data_editor(
     filtered_df[['Vybrané', 'Fáze', 'Aktivita', 'Upravené množství', 'Upravená cena za jednotku', 'Poznámky']],
     num_rows="dynamic",
@@ -526,12 +458,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
-
 with col1:
-    # Sunburst chart pro fáze - moderný štýl
     selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
     phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum()
-    
     fig_sunburst = px.sunburst(
         names=phase_costs.index,
         parents=[''] * len(phase_costs),
@@ -560,9 +489,7 @@ with col1:
         textfont_size=18
     )
     st.plotly_chart(fig_sunburst, use_container_width=True)
-
 with col2:
-    # Bar chart pro top aktivity - moderný štýl
     top_activities = selected_activities.nlargest(10, 'Náklady')
     fig_bar = px.bar(
         top_activities,
@@ -595,17 +522,14 @@ with col2:
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-# --- Dodatečné grafy ---
+# --- Dodatočné grafy ---
 st.markdown("""
 <div class="chart-container">
     <h3 style="text-align: center; color: #1e3a8a; margin-bottom: 2rem;">Detailní analýza</h3>
 </div>
 """, unsafe_allow_html=True)
-
 col1, col2 = st.columns(2)
-
 with col1:
-    # Pie chart pro rozložení nákladů - moderný štýl
     fig_pie = px.pie(
         values=phase_costs.values,
         names=phase_costs.index,
@@ -630,13 +554,10 @@ with col1:
         pull=[0.05]*len(phase_costs)
     )
     st.plotly_chart(fig_pie, use_container_width=True)
-
 with col2:
-    # Line chart pro trend nákladů - moderný štýl
     phase_order = ['Analytická fáze', 'Přípravní fáze', 'Průběh soutěžního workshopu (SW)', 
                    'Vyhlášení výsledků SW', 'PR podpora v průběhu celé soutěže']
     phase_costs_ordered = phase_costs.reindex([p for p in phase_order if p in phase_costs.index])
-    
     fig_line = px.line(
         x=phase_costs_ordered.index,
         y=phase_costs_ordered.values,
@@ -671,17 +592,12 @@ st.markdown("""
     <h3>Export dat</h3>
 </div>
 """, unsafe_allow_html=True)
-
 col1, col2 = st.columns(2)
-
 with col1:
     if st.button("Export do Excel", type="primary"):
-        # Vytvoření Excel souboru
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
             selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
-            
-            # Přidání shrnutí
             summary_data = {
                 'Metrika': ['Celkové náklady', 'Počet aktivit', 'Průměrná cena na aktivitu'],
                 'Hodnota': [
@@ -692,7 +608,6 @@ with col1:
             }
             summary_df = pd.DataFrame(summary_data)
             summary_df.to_excel(writer, sheet_name='Shrnutí', index=False)
-        
         output.seek(0)
         st.download_button(
             label="Stáhnout Excel soubor",
@@ -700,7 +615,6 @@ with col1:
             file_name=f"kalkulace_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
 with col2:
     if st.button("Reset hodnot"):
         st.rerun()
