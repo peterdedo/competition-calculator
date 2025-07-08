@@ -598,10 +598,9 @@ with col2:
         paper_bgcolor='rgba(255,255,255,0.98)',
         font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
         plot_bgcolor='rgba(240,245,255,0.8)',
-        showlegend=False
+        showlegend=False,
+        xaxis_tickangle=-45
     )
-    fig_bar.update_xaxes(tickangle=-45, tickfont=dict(size=14))
-    fig_bar.update_yaxes(title="Náklady (Kč)", titlefont=dict(size=16), tickfont=dict(size=14))
     fig_bar.update_traces(
         textposition='outside',
         marker_line_width=3,
