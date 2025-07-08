@@ -9,127 +9,172 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from io import BytesIO
 
-# Moderný dizajn
+# Nastavení stránky
 st.set_page_config(
     page_title="Kalkulátor soutěžního workshopu",
-    page_icon=":bar_chart:",
+    page_icon=":cityscape:",
     layout="wide"
 )
 
-# Vlastní styl
+# Urbanistický styl a písmo
 st.markdown("""
 <style>
-    .main-header { background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); padding: 1rem; border-radius: 8px; color: white; text-align: center; font-size: 1.3rem; margin-bottom: 1rem; }
-    .phase-header { background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%); padding: 0.5rem; border-radius: 6px; color: white; margin-top: 1rem; font-weight: 600; }
-    .metric-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1rem; border-radius: 12px; color: white; text-align: center; margin: 0.5rem 0; }
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+    html, body {
+        background: #f4f4f4;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .main-header {
+        background: url('https://www.transparenttextures.com/patterns/asfalt-light.png'),
+                    linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        padding: 1.2rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        color: #ecf0f1;
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .subheader {
+        color: #2c3e50;
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding: 0.5rem 0;
+    }
+    .phase-header {
+        background: #27ae60;
+        padding: 0.6rem;
+        border-radius: 6px;
+        color: white;
+        margin-top: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .metric-card {
+        background: #ecf0f1;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: #2c3e50;
+    }
+    .metric-card h3 {
+        margin: 0;
+        font-weight: 600;
+    }
+    .metric-card h2 {
+        margin: 0.5rem 0 0;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+    .footer {
+        text-align: center;
+        color: #95a5a6;
+        padding: 2rem 0;
+        font-size: 0.9rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar: nastavení varianty, typ, filtry
-st.sidebar.header("Nastavení");
-variant = st.sidebar.radio(
-    "Vyberte variantu:",
+# Sidebar konfigurace
+st.sidebar.header("Nastavení workshopu")
+variant = st.sidebar.selectbox(
+    "Variant workshopu:",
     ["Mezinárodní soutěžní workshop", "Soutěžní workshop v češtině"]
 )
-unit_type = st.sidebar.radio(
+unit_type = st.sidebar.selectbox(
     "Typ jednotek:",
-    ["Počet jednotek (změna MP)", "Počet jednotek (změna MP + transformační plochy)"]
+    ["MP", "MP + TP"]
+)
+search_query = st.sidebar.text_input("🔍 Hledat aktivitu:")
+selected_phases = st.sidebar.multiselect(
+    "🗂️ Vyber fáze:",
+    df["Fáze"].unique(), default=df["Fáze"].unique()
 )
 
-# Načtení dat
-activities_data = [
-    # (data jako dříve...)
-]
-df = pd.DataFrame(activities_data)
-fazes = list(df["Fáze"].unique())
-
-# Filtry
-search_query = st.sidebar.text_input("Hledat aktivitu:")
-selected_phases = st.sidebar.multiselect("Vyber fáze:", fazes, default=fazes)
-
-# Výpočet klíčů
-vkey = "MEZ" if "Mezinárodní" in variant else "CZ"
-ukey = "MP" if "MP)" in unit_type else "MP+TP"
-
 # Hlavní nadpis
-st.markdown(f"<div class='main-header'><h1>Kalkulátor soutěžního workshopu</h1></div>", unsafe_allow_html=True)
+st.markdown('<div class="main-header">Kalkulátor soutěžního workshopu</div>', unsafe_allow_html=True)
 
-# Iterace přes fáze
-selected_activities = []
-total = 0
-selected_count = 0
-for faze in faze_df_unique := fazes:
-    if faze not in selected_phases:
+# Zpracování dat
+vkey = "MEZ" if "Mezinárodní" in variant else "CZ"
+ukey = "MP" if unit_type == "MP" else "MP+TP"
+
+df_filtered = df[df["Fáze"].isin(selected_phases)]
+if search_query:
+    df_filtered = df_filtered[df_filtered["Aktivita"].str.contains(search_query, case=False, na=False)]
+
+selected_activities, total, selected_count = [], 0, 0
+
+# Výpis fází a aktivit
+for faze in selected_phases:
+    fase_df = df_filtered[df_filtered["Fáze"] == faze]
+    if fase_df.empty:
         continue
-    faze_df = df[df["Fáze"] == faze]
-    if search_query:
-        faze_df = faze_df[faze_df["Aktivita"].str.contains(search_query, case=False, na=False)]
-        if faze_df.empty:
-            continue
-    st.markdown(f"<div class='phase-header'>{faze}</div>", unsafe_allow_html=True)
+    st.markdown(f'<div class="phase-header">🏙️ {faze}</div>', unsafe_allow_html=True)
     faze_total = 0
-
-    for i, row in faze_df.iterrows():
-        key = f"units_{faze}_{i}"
-        default_units = row.get(f"{ukey} jednotky - {vkey}", 0)
-        max_units = float(row.get("Cena za jednotku", 0))
-        with st.expander(row["Aktivita"]):
+    for idx, row in fase_df.iterrows():
+        with st.expander(f"{row['Aktivita']}"):
+            default_units = row.get(f"{ukey} jednotky - {vkey}", 0) or 0
             units = st.number_input(
-                "Jednotek:", min_value=0.0, value=float(default_units), step=0.5, key=key
+                "Množství:", value=float(default_units), step=0.5,
+                key=f"u_{faze}_{idx}"
             )
-            subtotal = units * row["Cena za jednotku"]
-            col1, col2 = st.columns(2)
-            with col1:
-                st.write(f"**Jednotka:** {row['Jednotka']}")
-                st.write(f"**Cena za jednotku:** {row['Cena za jednotku']:,} Kč")
-            with col2:
-                st.write(f"**Subtotal:** {subtotal:,} Kč")
-                st.write(f"**Původní cena:** {row.get(f'Cena {ukey} - {vkey}', 0):,} Kč")
+            subtotal = units * row['Cena za jednotku']
+            cols = st.columns(3)
+            cols[0].markdown(f"**Jednotka:** {row['Jednotka']}")
+            cols[1].markdown(f"**Cena/jedn.:** {row['Cena za jednotku']:,} Kč")
+            cols[2].markdown(f"**Subtotal:** {subtotal:,} Kč")
             if units > 0:
                 selected_activities.append({
-                    "Fáze": faze,
-                    "Aktivita": row['Aktivita'],
-                    "Jednotka": row['Jednotka'],
-                    "Množství": units,
-                    "Cena za jednotku": row['Cena za jednotku'],
-                    "Subtotal": subtotal
+                    'Fáze': faze, 'Aktivita': row['Aktivita'],
+                    'Množství': units, 'Cena': subtotal
                 })
                 faze_total += subtotal
                 total += subtotal
                 selected_count += 1
+    if faze_total:
+        st.markdown(f'<div class="metric-card">Celkem {faze}:<br><strong>{faze_total:,} Kč</strong></div>', unsafe_allow_html=True)
 
-    if faze_total > 0:
-        st.markdown(f"<div class='metric-card'><strong>{faze}:</strong> {faze_total:,} Kč</div>", unsafe_allow_html=True)
+# Stavový pruh
+st.progress(selected_count / len(df) if df.shape[0] else 0)
 
-# Pokrok
-progress = selected_count / len(df) if df.shape[0] else 0
-st.progress(progress, text=f"Vybráno: {selected_count}/{df.shape[0]}")
-
-# Vizualizace
+# Vizualizace nákladů
 if selected_activities:
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.markdown("<div class='main-header'><h2>Vizualizace</h2></div>", unsafe_allow_html=True)
+    st.markdown('<div class="subheader">Vizualizace nákladů podle fází a aktivit</div>', unsafe_allow_html=True)
     df_sel = pd.DataFrame(selected_activities)
     c1, c2 = st.columns(2)
     with c1:
-        fig = px.pie(df_sel.groupby('Fáze')['Subtotal'].sum().reset_index(), values='Subtotal', names='Fáze', title='Náklady podle fází')
-        st.plotly_chart(fig, use_container_width=True)
+        fig1 = px.pie(
+            df_sel.groupby('Fáze')['Cena'].sum().reset_index(),
+            names='Fáze', values='Cena', hole=0.4,
+            title='Podíl nákladů dle fází'
+        )
+        st.plotly_chart(fig1, use_container_width=True)
     with c2:
-        fig2 = px.bar(df_sel, x='Aktivita', y='Subtotal', color='Fáze', title='Náklady podle aktivit')
-        fig2.update_xaxes(tickangle=45)
+        fig2 = px.bar(
+            df_sel, x='Aktivita', y='Cena', color='Fáze',
+            title='Náklady dle aktivit'
+        )
+        fig2.update_layout(xaxis_tickangle=45)
         st.plotly_chart(fig2, use_container_width=True)
 
-# Výsledky
-st.markdown("<hr>", unsafe_allow_html=True)
+# Shrnutí a export
+st.markdown('<hr>', unsafe_allow_html=True)
 vat = total * 0.21
 tot_vat = total + vat
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown(f"<div class='metric-card'><h3>Bez DPH</h3><h2>{total:,} Kč</h2></div>", unsafe_allow_html=True)
-with c2:
-    st.markdown(f"<div class='metric-card'><h3>DPH (21%)</h3><h2>{vat:,} Kč</h2></div>", unsafe_allow_html=True)
-with c3:
-    st.markdown(f"<div class='metric-card'><h3>S DPH</h3><h2>{tot_vat:,} Kč</h2></div>", unsafe_allow_html=True)
+st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
+for title, amount in [('Bez DPH', total), ('DPH 21%', vat), ('Celkem s DPH', tot_vat)]:
+    st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{amount:,} Kč</h2></div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Detail a export jako dříve...
-st.markdown(f"<div style='text-align:center; color:#888; padding:1rem;'>Aktualizováno: {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>", unsafe_allow_html=True)
+# Footer
+st.markdown(f'<div class="footer">Aktualizováno: {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>', unsafe_allow_html=True)
