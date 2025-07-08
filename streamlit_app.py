@@ -44,6 +44,13 @@ st.markdown("""
         text-align: center;
         margin: 0.5rem 0;
     }
+    .variant-selector {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        color: white;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -55,6 +62,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Výber varianty a typu jednotiek
+st.markdown("""
+<div class="variant-selector">
+    <h3>Výběr varianty a typu jednotek</h3>
+</div>
+""", unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
     variant = st.radio(
@@ -69,96 +82,139 @@ with col2:
         horizontal=True
     )
 
-# Kompletné dáta so všetkými fázami a aktivitami
+# Kompletné dáta presne podľa tabuľky
 activities_data = [
-    # Analytická fáze
-    {"Fáze": "Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 1. Analytická fáze
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 1, "MP jednotky - CZ": 1, "MP+TP jednotky - MEZ": 1.5, "MP+TP jednotky - CZ": 1.5,
-     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000},
-    {"Fáze": "Analytická fáze", "Aktivita": "Vymezení řešeného území", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000,
+     "Poznámka": "Zahájení projektu, definice cílů"},
+    
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Vymezení řešeného území", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 1, "MP jednotky - CZ": 1, "MP+TP jednotky - MEZ": 1.5, "MP+TP jednotky - CZ": 1.5,
-     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000},
-    {"Fáze": "Analytická fáze", "Aktivita": "Seznámení se s dostupnými materiály a záměry v území", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000,
+     "Poznámka": "Definice hranic a rozsahu"},
+    
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Seznámení se s dostupnými materiály a záměry v území", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 6, "MP jednotky - CZ": 6, "MP+TP jednotky - MEZ": 9, "MP+TP jednotky - CZ": 9,
-     "Cena MP - MEZ": 84000, "Cena MP - CZ": 84000, "Cena MP+TP - MEZ": 126000, "Cena MP+TP - CZ": 126000},
-    {"Fáze": "Analytická fáze", "Aktivita": "Analýza stavu území na základě předem definovaných parametrů", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 84000, "Cena MP - CZ": 84000, "Cena MP+TP - MEZ": 126000, "Cena MP+TP - CZ": 126000,
+     "Poznámka": "Studium dokumentace a plánů"},
+    
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Analýza stavu území na základě předem definovaných parametrů", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 8, "MP jednotky - CZ": 8, "MP+TP jednotky - MEZ": 12, "MP+TP jednotky - CZ": 12,
-     "Cena MP - MEZ": 112000, "Cena MP - CZ": 112000, "Cena MP+TP - MEZ": 168000, "Cena MP+TP - CZ": 168000},
-    {"Fáze": "Analytická fáze", "Aktivita": "Kompletace výstupu z analýzy jako podkladu pro zadání soutěže", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 112000, "Cena MP - CZ": 112000, "Cena MP+TP - MEZ": 168000, "Cena MP+TP - CZ": 168000,
+     "Poznámka": "Terénní průzkum a analýza"},
+    
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Kompletace výstupu z analýzy jako podkladu pro zadání soutěže", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 3, "MP jednotky - CZ": 3, "MP+TP jednotky - MEZ": 4.5, "MP+TP jednotky - CZ": 4.5,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000},
-    {"Fáze": "Analytická fáze", "Aktivita": "Nalezení dohody aktérů (memorandum o shodě)", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000,
+     "Poznámka": "Zpracování analýzy do zadání"},
+    
+    {"Fáze": "1. Analytická fáze", "Aktivita": "Nalezení dohody aktérů (memorandum o shodě)", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 4, "MP jednotky - CZ": 4, "MP+TP jednotky - MEZ": 6, "MP+TP jednotky - CZ": 6,
-     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000},
+     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000,
+     "Poznámka": "Koordinace s dotčenými subjekty"},
 
-    # Přípravní fáze
-    {"Fáze": "Přípravní fáze", "Aktivita": "Návrh procesu soutěže (harmonogram, pracovní skupiny)", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 2. Přípravní fáze
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Návrh procesu soutěže (harmonogram, pracovní skupiny)", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 5, "MP jednotky - CZ": 5, "MP+TP jednotky - MEZ": 7.5, "MP+TP jednotky - CZ": 7.5,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení podrobného rozpočtu", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000,
+     "Poznámka": "Plánování průběhu soutěže"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Sestavení podrobného rozpočtu", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 3, "MP jednotky - CZ": 3, "MP+TP jednotky - MEZ": 4.5, "MP+TP jednotky - CZ": 4.5,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Identifikace aktérů a návrh jejich zapojení", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000,
+     "Poznámka": "Detailní kalkulace nákladů"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Identifikace aktérů a návrh jejich zapojení", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 4, "MP jednotky - CZ": 4, "MP+TP jednotky - MEZ": 6, "MP+TP jednotky - CZ": 6,
-     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Komunikace s veřejností", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000,
+     "Poznámka": "Mapování zainteresovaných stran"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Komunikace s veřejností", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 6, "MP jednotky - CZ": 6, "MP+TP jednotky - MEZ": 9, "MP+TP jednotky - CZ": 9,
-     "Cena MP - MEZ": 84000, "Cena MP - CZ": 84000, "Cena MP+TP - MEZ": 126000, "Cena MP+TP - CZ": 126000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Vytvoření značky soutěže", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 84000, "Cena MP - CZ": 84000, "Cena MP+TP - MEZ": 126000, "Cena MP+TP - CZ": 126000,
+     "Poznámka": "PR a osvěta"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Vytvoření značky soutěže", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 3, "MP jednotky - CZ": 3, "MP+TP jednotky - MEZ": 4.5, "MP+TP jednotky - CZ": 4.5,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "PR strategie projektu", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000,
+     "Poznámka": "Grafický design a branding"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "PR strategie projektu", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 4, "MP jednotky - CZ": 4, "MP+TP jednotky - MEZ": 6, "MP+TP jednotky - CZ": 6,
-     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Kompletace zadání (včetně stavebního programu)", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 56000, "Cena MP - CZ": 56000, "Cena MP+TP - MEZ": 84000, "Cena MP+TP - CZ": 84000,
+     "Poznámka": "Komunikační strategie"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Kompletace zadání (včetně stavebního programu)", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 7, "MP jednotky - CZ": 7, "MP+TP jednotky - MEZ": 10.5, "MP+TP jednotky - CZ": 10.5,
-     "Cena MP - MEZ": 98000, "Cena MP - CZ": 98000, "Cena MP+TP - MEZ": 147000, "Cena MP+TP - CZ": 147000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Formulace soutěžních podmínek", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 98000, "Cena MP - CZ": 98000, "Cena MP+TP - MEZ": 147000, "Cena MP+TP - CZ": 147000,
+     "Poznámka": "Vypracování soutěžních podmínek"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Formulace soutěžních podmínek", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 5, "MP jednotky - CZ": 5, "MP+TP jednotky - MEZ": 7.5, "MP+TP jednotky - CZ": 7.5,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Finalizace a publikace podmínek", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000,
+     "Poznámka": "Právní formulace podmínek"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Finalizace a publikace podmínek", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 2, "MP jednotky - CZ": 2, "MP+TP jednotky - MEZ": 3, "MP+TP jednotky - CZ": 3,
-     "Cena MP - MEZ": 28000, "Cena MP - CZ": 28000, "Cena MP+TP - MEZ": 42000, "Cena MP+TP - CZ": 42000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení poroty", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 28000, "Cena MP - CZ": 28000, "Cena MP+TP - MEZ": 42000, "Cena MP+TP - CZ": 42000,
+     "Poznámka": "Publikace soutěžních podmínek"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Sestavení poroty", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 3, "MP jednotky - CZ": 3, "MP+TP jednotky - MEZ": 4.5, "MP+TP jednotky - CZ": 4.5,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000},
-    {"Fáze": "Přípravní fáze", "Aktivita": "Ustavující schůze poroty", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000,
+     "Poznámka": "Výběr a oslovení porotců"},
+    
+    {"Fáze": "2. Přípravní fáze", "Aktivita": "Ustavující schůze poroty", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 1, "MP jednotky - CZ": 1, "MP+TP jednotky - MEZ": 1.5, "MP+TP jednotky - CZ": 1.5,
-     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000},
+     "Cena MP - MEZ": 14000, "Cena MP - CZ": 14000, "Cena MP+TP - MEZ": 21000, "Cena MP+TP - CZ": 21000,
+     "Poznámka": "První setkání poroty"},
 
-    # Průběh SW
-    {"Fáze": "Průběh SW", "Aktivita": "Vyhlášení soutěže a výběr účastníků", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 3. Průběh SW
+    {"Fáze": "3. Průběh SW", "Aktivita": "Vyhlášení soutěže a výběr účastníků", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 2, "MP jednotky - CZ": 2, "MP+TP jednotky - MEZ": 3, "MP+TP jednotky - CZ": 3,
-     "Cena MP - MEZ": 28000, "Cena MP - CZ": 28000, "Cena MP+TP - MEZ": 42000, "Cena MP+TP - CZ": 42000},
-    {"Fáze": "Průběh SW", "Aktivita": "Příprava a organizace 1. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 28000, "Cena MP - CZ": 28000, "Cena MP+TP - MEZ": 42000, "Cena MP+TP - CZ": 42000,
+     "Poznámka": "Výběr soutěžících týmů"},
+    
+    {"Fáze": "3. Průběh SW", "Aktivita": "Příprava a organizace 1. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 5, "MP jednotky - CZ": 5, "MP+TP jednotky - MEZ": 7.5, "MP+TP jednotky - CZ": 7.5,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000},
-    {"Fáze": "Průběh SW", "Aktivita": "Příprava a organizace 2. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000,
+     "Poznámka": "Organizace prvního workshopu"},
+    
+    {"Fáze": "3. Průběh SW", "Aktivita": "Příprava a organizace 2. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 5, "MP jednotky - CZ": 5, "MP+TP jednotky - MEZ": 7.5, "MP+TP jednotky - CZ": 7.5,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000},
-    {"Fáze": "Průběh SW", "Aktivita": "Příprava a organizace 3. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
+     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000,
+     "Poznámka": "Organizace druhého workshopu"},
+    
+    {"Fáze": "3. Průběh SW", "Aktivita": "Příprava a organizace 3. workshopu", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 5, "MP jednotky - CZ": 5, "MP+TP jednotky - MEZ": 7.5, "MP+TP jednotky - CZ": 7.5,
-     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000},
+     "Cena MP - MEZ": 70000, "Cena MP - CZ": 70000, "Cena MP+TP - MEZ": 105000, "Cena MP+TP - CZ": 105000,
+     "Poznámka": "Organizace třetího workshopu"},
 
-    # Vyhlášení výsledků
-    {"Fáze": "Vyhlášení výsledků", "Aktivita": "Ukončení soutěže a podpora další fáze", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 4. Vyhlášení výsledků
+    {"Fáze": "4. Vyhlášení výsledků", "Aktivita": "Ukončení soutěže a podpora další fáze", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 3, "MP jednotky - CZ": 3, "MP+TP jednotky - MEZ": 4.5, "MP+TP jednotky - CZ": 4.5,
-     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000},
+     "Cena MP - MEZ": 42000, "Cena MP - CZ": 42000, "Cena MP+TP - MEZ": 63000, "Cena MP+TP - CZ": 63000,
+     "Poznámka": "Finalizace a předání výsledků"},
 
-    # PR podpora
-    {"Fáze": "PR podpora", "Aktivita": "Tiskové zprávy, web, katalog, výstava", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 5. PR podpora
+    {"Fáze": "5. PR podpora", "Aktivita": "Tiskové zprávy, web, katalog, výstava", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 8, "MP jednotky - CZ": 8, "MP+TP jednotky - MEZ": 12, "MP+TP jednotky - CZ": 12,
-     "Cena MP - MEZ": 112000, "Cena MP - CZ": 112000, "Cena MP+TP - MEZ": 168000, "Cena MP+TP - CZ": 168000},
+     "Cena MP - MEZ": 112000, "Cena MP - CZ": 112000, "Cena MP+TP - MEZ": 168000, "Cena MP+TP - CZ": 168000,
+     "Poznámka": "Komunikace výsledků"},
 
-    # Externí náklady
-    {"Fáze": "Externí náklady", "Aktivita": "Ubytování, překlady, grafika, web", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 6. Externí náklady
+    {"Fáze": "6. Externí náklady", "Aktivita": "Ubytování, překlady, grafika, web", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 10, "MP jednotky - CZ": 10, "MP+TP jednotky - MEZ": 15, "MP+TP jednotky - CZ": 15,
-     "Cena MP - MEZ": 140000, "Cena MP - CZ": 140000, "Cena MP+TP - MEZ": 210000, "Cena MP+TP - CZ": 210000},
+     "Cena MP - MEZ": 140000, "Cena MP - CZ": 140000, "Cena MP+TP - MEZ": 210000, "Cena MP+TP - CZ": 210000,
+     "Poznámka": "Externí služby a materiály"},
 
-    # Odměny
-    {"Fáze": "Odměny", "Aktivita": "Odměny porotcům a účastníkům", "Jednotka": "den", "Cena za jednotku": 14000,
+    # 7. Odměny
+    {"Fáze": "7. Odměny", "Aktivita": "Odměny porotcům a účastníkům", "Jednotka": "den", "Cena za jednotku": 14000,
      "MP jednotky - MEZ": 15, "MP jednotky - CZ": 15, "MP+TP jednotky - MEZ": 22.5, "MP+TP jednotky - CZ": 22.5,
-     "Cena MP - MEZ": 210000, "Cena MP - CZ": 210000, "Cena MP+TP - MEZ": 315000, "Cena MP+TP - CZ": 315000}
+     "Cena MP - MEZ": 210000, "Cena MP - CZ": 210000, "Cena MP+TP - MEZ": 315000, "Cena MP+TP - CZ": 315000,
+     "Poznámka": "Odměny pro porotce a soutěžící"}
 ]
 
 df = pd.DataFrame(activities_data)
@@ -172,6 +228,10 @@ total_activities = len(df)
 # Kľúče podľa výberu
 vkey = "MEZ" if "Mezinárodní" in variant else "CZ"
 ukey = "MP" if "MP)" in unit_type else "MP+TP"
+
+# Zobrazenie len vybraného variantu a typu jednotiek
+st.markdown("---")
+st.markdown(f"<div class='main-header'><h2>Aktivity pro {variant} - {unit_type}</h2></div>", unsafe_allow_html=True)
 
 for faze in fazes:
     st.markdown(f"<div class='phase-header'>{faze}</div>", unsafe_allow_html=True)
@@ -187,6 +247,7 @@ for faze in fazes:
             cena_za_jednotku = row.get("Cena za jednotku", 0) or 0
             if jednotky_default and cena_za_aktivitu:
                 cena_za_jednotku = int(cena_za_aktivitu / jednotky_default)
+            
             jednotky = st.number_input(
                 "Jednotek",
                 min_value=0,
@@ -194,9 +255,16 @@ for faze in fazes:
                 key=f"units_{faze}_{i}_{row['Aktivita'].replace(' ', '_')}_{jednotky_key}"
             )
             subtotal = jednotky * cena_za_jednotku
-            st.write(f"Jednotka: {row['Jednotka']}")
-            st.write(f"Cena za jednotku: {cena_za_jednotku:,} Kč")
-            st.write(f"Subtotal: {subtotal:,} Kč")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(f"**Jednotka:** {row['Jednotka']}")
+                st.write(f"**Cena za jednotku:** {cena_za_jednotku:,} Kč")
+            with col2:
+                st.write(f"**Subtotal:** {subtotal:,} Kč")
+                if row.get("Poznámka"):
+                    st.info(f"**Poznámka:** {row['Poznámka']}")
+            
             if jednotky > 0:
                 selected_activities.append({
                     "Fáze": faze,
@@ -204,13 +272,15 @@ for faze in fazes:
                     "Jednotka": row['Jednotka'],
                     "Množství": jednotky,
                     "Cena za jednotku": cena_za_jednotku,
-                    "Subtotal": subtotal
+                    "Subtotal": subtotal,
+                    "Poznámka": row.get("Poznámka", "")
                 })
                 faze_total += subtotal
                 total += subtotal
                 selected_count += 1
+    
     if faze_total > 0:
-        st.markdown(f"<div class='metric-card'><strong>Fáze {faze}:</strong> {faze_total:,} Kč</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='metric-card'><strong>{faze}:</strong> {faze_total:,} Kč</div>", unsafe_allow_html=True)
 
 # Progress bar
 progress = selected_count / total_activities if total_activities else 0
@@ -307,7 +377,7 @@ if selected_activities:
                 elements.append(Spacer(1, 20))
                 elements.append(Paragraph("Detailní přehled aktivit:", styles['Heading2']))
                 elements.append(Spacer(1, 10))
-                table_data = [['Fáze', 'Aktivita', 'Jednotka', 'Množství', 'Cena za jednotku', 'Subtotal']]
+                table_data = [['Fáze', 'Aktivita', 'Jednotka', 'Množství', 'Cena za jednotku', 'Subtotal', 'Poznámka']]
                 for _, row in df_data.iterrows():
                     table_data.append([
                         row['Fáze'],
@@ -315,7 +385,8 @@ if selected_activities:
                         row['Jednotka'],
                         str(row['Množství']),
                         f"{row['Cena za jednotku']:,}",
-                        f"{row['Subtotal']:,}"
+                        f"{row['Subtotal']:,}",
+                        row.get('Poznámka', '')
                     ])
                 max_rows_per_page = 25
                 for i in range(0, len(table_data), max_rows_per_page):
