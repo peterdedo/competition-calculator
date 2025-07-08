@@ -22,26 +22,22 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Data Loading ---
+# --- Load Activities ---
 @st.cache_data
-def load_activities(path='Strukturovan__nab_dka.csv'):
-    for p in [path, '/mount/data/Strukturovan__nab_dka.csv', '/mnt/data/Strukturovan__nab_dka.csv']:
-        try:
-            df = pd.read_csv(p, sep=',', encoding='utf-8', skipinitialspace=True)
-        except FileNotFoundError:
-            continue
-        except pd.errors.ParserError:
-            try:
-                df = pd.read_csv(p, sep=';', encoding='utf-8', skipinitialspace=True)
-            except Exception:
-                continue
-        # Remove unnamed first column
-        if df.columns[0].lower().startswith('unnamed') or df.columns[0] == '':
-            df = df.iloc[:, 1:]
-        st.sidebar.info(f"Načteno z {p}")
-        return df
-    st.error("Nepodařilo se najít nebo načíst soubor s daty aktivit.")
-    st.stop()
+def load_activities(path='/mnt/data/Strukturovan__nab_dka.csv'):
+    """
+    Načte CSV s aktivitami: prázdný první sloupec odstraní a vrátí DataFrame.
+    """
+    try:
+        df = pd.read_csv(path, sep=',', encoding='utf-8', skipinitialspace=True)
+    except FileNotFoundError:
+        st.error(f"Soubor '{path}' nenalezen.")
+        st.stop()
+    # Odstraní první prázdný nebo nepoužitý sloupec
+    first_col = df.columns[0]
+    if first_col.lower().startswith('unnamed') or first_col == '' or first_col.startswith(','):
+        df = df.iloc[:, 1:]
+    return df
 
 df = load_activities()
 
@@ -56,18 +52,20 @@ with st.sidebar:
 # --- Header ---
 st.markdown('<div class="main-header">Kalkulátor soutěžního workshopu</div>', unsafe_allow_html=True)
 
-# --- Filter & Keys ---
+# --- Filter Data ---
 df = df[df["Fáze"].isin(phases)]
 if search:
     df = df[df["Aktivita"].str.contains(search, case=False, na=False)]
+
+# --- Determine Unit Column ---
 vkey = "MEZ" if variant.startswith("Mezinárodní") else "CZ"
 ukey = unit_type.replace(" ", "") + " jednotky"
 unit_col = f"{ukey} - {vkey}"
 
-# --- Quantity Input Table ---
+# --- Quantities Input ---
 df = df.rename(columns={unit_col: 'Množství'})
 df['Množství'] = df['Množství'].fillna(0)
-edited = st.experimental_data_editor(df[['Fáze','Aktivita','Jednotka','Cena za jednotku','Množství']], num_rows="dynamic")
+edited = st.experimental_data_editor(df[["Fáze","Aktivita","Jednotka","Cena za jednotku","Množství"]], num_rows="dynamic")
 
 # --- Calculate Costs ---
 edited['Cena'] = edited['Množství'] * edited['Cena za jednotku']
@@ -84,27 +82,24 @@ st.progress(min(len(selected) / max(len(df), 1), 1.0))
 
 # --- Visualizations ---
 if not selected.empty:
-    st.markdown('<div class="subheader">Vizualizace nákladů</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subheader">Vizualizace nákladů podle fází a aktivit</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     c1.plotly_chart(
         px.pie(
             selected.groupby('Fáze')['Cena'].sum().reset_index(),
             names='Fáze', values='Cena', hole=0.4
-        ),
-        use_container_width=True
+        ), use_container_width=True
     )
     c2.plotly_chart(
-        px.bar(selected, x='Aktivita', y='Cena', color='Fáze').update_layout(xaxis_tickangle=45),
-        use_container_width=True
+        px.bar(selected, x='Aktivita', y='Cena', color='Fáze').update_layout(xaxis_tickangle=45), use_container_width=True
     )
 
 # --- Summary & Footer ---
 vat = total * 0.21
 tot_vat = total + vat
-with st.container():
-    st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
-    for title, val in [('Bez DPH', total), ('DPH 21%', vat), ('S DPH', tot_vat)]:
-        st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{val:,.0f} Kč</h2></div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
+for title, val in [("Bez DPH", total), ("DPH 21%", vat), ("S DPH", tot_vat)]:
+    st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{val:,.0f} Kč</h2></div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f"<div class='footer'>Aktualizováno: {datetime.now():%d.%m.%Y %H:%M}</div>", unsafe_allow_html=True)
