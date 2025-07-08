@@ -27,3 +27,12 @@ git remote add origin https://github.com/peterdedo/competition-calculator.git
 # Nahrajte na GitHub
 git branch -M main
 git push -u origin main
+
+# Pridajte nový súbor
+git add streamlit_app.py
+
+# Commit zmeny
+git commit -m "Create new clean streamlit_app.py"
+
+# Push na GitHub
+git push
