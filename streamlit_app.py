@@ -53,10 +53,7 @@ phases_filter = st.sidebar.multiselect(
     "Fáze k zobrazení:", phases, default=phases
 )
 # Reset filters
-if st.sidebar.button("🔄 Resetovat filtry"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.experimental_rerun()
+# Reset functionality removed to avoid AttributeError
 
 # ------- Load Data (from CSV) -------
 from io import StringIO
