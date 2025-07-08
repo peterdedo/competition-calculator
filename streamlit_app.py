@@ -403,4 +403,6 @@ if selected_activities:
                 )
                 elements.append(Paragraph("Kalkulátor soutěžního workshopu", title_style))
                 elements.append(Spacer(1, 20))
-                elements.append(Paragr
+                elements.append(Paragraph("Celkové náklady:", styles['Heading2']))
+                elements.append(Spacer(1, 10))
+                summary_data = [
