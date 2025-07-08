@@ -593,23 +593,15 @@ with col2:
         title_x=0.5,
         title_font_size=22,
         title_font_color='#1e3a8a',
-        xaxis_tickangle=-45,
         height=600,
         margin=dict(t=80, l=0, r=0, b=0),
         paper_bgcolor='rgba(255,255,255,0.98)',
         font=dict(family='Inter, sans-serif', size=16, color='#1e2937'),
         plot_bgcolor='rgba(240,245,255,0.8)',
-        showlegend=False,
-        xaxis=dict(
-            tickfont=dict(size=14),
-            tickangle=-45
-        ),
-        yaxis=dict(
-            title="Náklady (Kč)",
-            titlefont=dict(size=16),
-            tickfont=dict(size=14)
-        )
+        showlegend=False
     )
+    fig_bar.update_xaxes(tickangle=-45, tickfont=dict(size=14))
+    fig_bar.update_yaxes(title="Náklady (Kč)", titlefont=dict(size=16), tickfont=dict(size=14))
     fig_bar.update_traces(
         textposition='outside',
         marker_line_width=3,
