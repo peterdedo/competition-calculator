@@ -85,6 +85,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Základní data (předpokládá se df už načtené)
 # Sidebar konfigurace
 st.sidebar.header("Nastavení workshopu")
 variant = st.sidebar.selectbox(
@@ -170,11 +171,11 @@ if selected_activities:
 # Shrnutí a export
 st.markdown('<hr>', unsafe_allow_html=True)
 vat = total * 0.21
-tot_vat = total + vat
+ tot_vat = total + vat
 st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
 for title, amount in [('Bez DPH', total), ('DPH 21%', vat), ('Celkem s DPH', tot_vat)]:
     st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{amount:,} Kč</h2></div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Footer
-st.markdown(f'<div class="footer">Aktualizováno: {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>', unsafe_allow_html=True)
+# Footer with corrected f-string syntax
+st.markdown(f"<div class=\"footer\">Aktualizováno: {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>", unsafe_allow_html=True)
