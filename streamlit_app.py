@@ -63,45 +63,8 @@ def load_data():
         {"Fáze":"Přípravní fáze","Aktivita":"Kompletace před vyhlášením soutěže a ustavující schůze poroty (včetně regulérnosti ČKA)","Jednotka":"den","Cena za jednotku":14000.0,"MP jednotky - MEZ":23.0,"MP jednotky - CZ":23.0,"MP+TP jednotky - MEZ":25.0,"MP+TP jednotky - CZ":25.0},
         {"Fáze":"Průběh soutěžního workshopu (SW)","Aktivita":"Vyhlášení soutěže – otevřená výzva a výběr soutěžících","Jednotka":"den","Cena za jednotku":14000.0,"MP jednotky - MEZ":7.0,"MP jednotky - CZ":5.0,"MP+TP jednotky - MEZ":7.0,"MP+TP jednotky - CZ":5.0},
         {"Fáze":"Průběh soutěžního workshopu (SW)","Aktivita":"Příprava a organizace 1. SW","Jednotka":"den","Cena za jednotku":14000.0,"MP jednotky - MEZ":30.0,"MP jednotky - CZ":25.0,"MP+TP jednotky - MEZ":30.0,"MP+TP jednotky - CZ":25.0},
-        {"Fáze":"Průběh soutěžního workshopu (SW)","Aktivita":"Příprava a organizace 2. SW","Jednotka":"den","Cena za jednotku":14000.0,"MP jednotky - MEZ":30.0,"MP jednotky - CZ":25.0,"
-    ])
-
-df = load_data()
-vkey = "MEZ" if variant.startswith("Mezinárodní") else "CZ"
-ukey = "MP" if "MP)" in unit_type else "MP+TP"
-
-# Filter by search
-df = df[df['Aktivita'].str.contains(search_term, case=False, na=False)] if search_term else df
-
-# --- Main Header ---
-st.markdown(f"<div class='header'><h1>Kalkulátor soutěžního workshopu</h1><p>Varianta: {variant} | Jednotky: {unit_type}</p></div>", unsafe_allow_html=True)
-
-# --- Tabs: Výběr, Vizualizace, Export ---
-tab1, tab2, tab3 = st.tabs(["Výběr aktivit", "Vizualizace", "Export"])
-selected = []
-
-with tab1:
-    st.markdown("<div class='subheader'>Výběr aktivit</div>", unsafe_allow_html=True)
-    for faze in df['Fáze'].unique():
-        st.markdown(f"<h3>{faze}</h3>", unsafe_allow_html=True)
-        faze_df = df[df['Fáze']==faze]
-        for idx, row in faze_df.iterrows():
-            cols = st.columns([3,1])
-            with cols[0]:
-                units = st.number_input(
-                    f"{row['Aktivita']}",
-                    min_value=0.0,
-                    value=float(row.get(f"{ukey} jednotky - {vkey}",0)),
-                    step=0.5,
-                    key=f"u_{idx}"
-                )
-            subtotal = units * row['Cena za jednotku']
-            cols[1].markdown(f"**{subtotal:,.0f} Kč**")
-            if units>0:
-                selected.append({
-                    'Fáze':row['Fáze'],'Aktivita':row['Aktivita'],'Jednotka':row['Jednotka'],
-                    'Množství':units,'Cena za jednotku':row['Cena za jednotku'],'Subtotal':subtotal
-                })
+        {"Fáze":"Průběh soutěžního workshopu (SW)","Aktivita":"Příprava a organizace 2. SW","Jednotka":"den","Cena za jednotku":14000.0,"MP jednotky - MEZ":30.0,"MP jednotky - CZ":25.0,"MP+TP jednotky - MEZ":30.0,"MP+TP jednotky - CZ":25.0},
+        # (pokračujte dalšími položkami nebo ukončete seznam)}]
 
 with tab2:
     st.markdown("<div class='subheader'>Vizualizace nákladů</div>", unsafe_allow_html=True)
