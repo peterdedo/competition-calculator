@@ -56,28 +56,75 @@ def load_data():
         # Continue with remaining entries following the same structure...
     ]  # <-- ensure the list is closed here
     return pd.DataFrame(data)
+
 def main():
     df = load_data()
-    # rest of your app logic...
-():
-    data = [
-        # Analytická fáze
-        {"Fáze":"Analytická fáze","Aktivita":"Sestavení řídící skupiny","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":1,"MP jednotky - CZ":1,"MP+TP jednotky - MEZ":2,"MP+TP jednotky - CZ":2},
-        {"Fáze":"Analytická fáze","Aktivita":"Vymezení řešeného území","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":1,"MP jednotky - CZ":1,"MP+TP jednotky - MEZ":2,"MP+TP jednotky - CZ":2},
-        {"Fáze":"Analytická fáze","Aktivita":"Seznámení se s dostupnými materiály a záměry v území","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":6,"MP jednotky - CZ":6,"MP+TP jednotky - MEZ":8,"MP+TP jednotky - CZ":8},
-        {"Fáze":"Analytická fáze","Aktivita":"Analýza stavu území na základě předem definovaných parametrů a indikátorů","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":32,"MP jednotky - CZ":32,"MP+TP jednotky - MEZ":42,"MP+TP jednotky - CZ":42},
-        {"Fáze":"Analytická fáze","Aktivita":"Kompletace výstupu z analýzy jako podkladu pro zadání soutěže","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":8,"MP jednotky - CZ":8,"MP+TP jednotky - MEZ":11,"MP+TP jednotky - CZ":11},
-        {"Fáze":"Analytická fáze","Aktivita":"Nalezení dohody aktérů (podpis memoranda o shodě na záměru v území)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":3,"MP jednotky - CZ":3,"MP+TP jednotky - MEZ":6,"MP+TP jednotky - CZ":6},
-        # Přípravní fáze
-        {"Fáze":"Přípravní fáze","Aktivita":"Návrh procesu soutěže (harmonogram, návrh pracovní a konzultační skupiny)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":15,"MP jednotky - CZ":15,"MP+TP jednotky - MEZ":20,"MP+TP jednotky - CZ":20},
-        {"Fáze":"Přípravní fáze","Aktivita":"Sestavení podrobného rozpočtu","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":3,"MP jednotky - CZ":2,"MP+TP jednotky - MEZ":4,"MP+TP jednotky - CZ":3},
-        {"Fáze":"Přípravní fáze","Aktivita":"Identifikace hlavních aktérů a návrh jejich zapojení do procesu (včetně moderace diskuzí)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":10,"MP jednotky - CZ":10,"MP+TP jednotky - MEZ":15,"MP+TP jednotky - CZ":15},
-        {"Fáze":"Přípravní fáze","Aktivita":"Komunikace s veřejností (návrh procesu, organizace, zpracování výstupů)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":0,"MP jednotky - CZ":0,"MP+TP jednotky - MEZ":15,"MP+TP jednotky - CZ":15},
-        {"Fáze":"Přípravní fáze","Aktivita":"Vytvoření značky soutěže (včetně konzultace se zadavatelem)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":4,"MP jednotky - CZ":4,"MP+TP jednotky - MEZ":4,"MP+TP jednotky - CZ":4},
-        {"Fáze":"Přípravní fáze","Aktivita":"PR strategie projektu","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":4,"MP jednotky - CZ":3,"MP+TP jednotky - MEZ":4,"MP+TP jednotky - CZ":3},
-        {"Fáze":"Přípravní fáze","Aktivita":"Kompletace zadání (parametry využití území, stavební program, průběžná jednávání s ŘS a PS)","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":30,"MP jednotky - CZ":25,"MP+TP jednotky - MEZ":50,"MP+TP jednotky - CZ":40},
-        {"Fáze":"Přípravní fáze","Aktivita":"Formulace soutěžních podmínek","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":16,"MP jednotky - CZ":16,"MP+TP jednotky - MEZ":20,"MP+TP jednotky - CZ":20},
-        {"Fáze":"Přípravní fáze","Aktivita":"Finalizace a publikace soutěžních podmínek a zadání","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":4,"MP jednotky - CZ":4,"MP+TP jednotky - MEZ":5,"MP+TP jednotky - CZ":5},
-        {"Fáze":"Přípravní fáze","Aktivita":"Sestavení poroty","Jednotka":"den","Cena za jednotku":14000,"MP jednotky - MEZ":6,"MP jednotky - CZ":5,"MP+TP jednotky - MEZ":9,"
+    vkey = "MEZ" if variant.startswith("Mezinárodní") else "CZ"
+    ukey = "MP" if "MP)" in unit_choice else "MP+TP"
 
-         
+    # Filter by phase and search
+    df = df[df['Fáze'].isin(show_phases)]
+    if search_term:
+        df = df[df['Aktivita'].str.contains(search_term, case=False, na=False)]
+
+    # Inputs
+    selected = []
+    progress = st.progress(0)
+    for i, row in df.iterrows():
+        cols = st.columns([3,1])
+        units = cols[0].number_input(
+            f"{row['Fáze']} – {row['Aktivita']}",
+            value=float(row[f"{ukey} jednotky - {vkey}"]),
+            step=0.5,
+            min_value=0.0,
+            key=f"unit_{i}"
+        )
+        subtotal = units * row['Cena za jednotku']
+        cols[1].markdown(f"**{subtotal:,.0f} Kč**")
+        if units > 0:
+            selected.append({
+                'Fáze': row['Fáze'],
+                'Aktivita': row['Aktivita'],
+                'Jednotka': row['Jednotka'],
+                'Množství': units,
+                'Cena': row['Cena za jednotku'],
+                'Subtotal': subtotal
+            })
+        progress.progress((i+1)/len(df))
+
+    # Summary and export
+    if selected:
+        sel_df = pd.DataFrame(selected)
+        total = sel_df['Subtotal'].sum()
+        vat = total * 0.21
+        total_vat = total + vat
+
+        st.markdown("---")
+        st.markdown("<div class='subheader'>Celkové náklady</div>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns(3)
+        c1.markdown(f"<div class='metric-card'><h4>Bez DPH</h4><h2>{total:,.0f} Kč</h2></div>", unsafe_allow_html=True)
+        c2.markdown(f"<div class='metric-card'><h4>DPH 21%</h4><h2>{vat:,.0f} Kč</h2></div>", unsafe_allow_html=True)
+        c3.markdown(f"<div class='metric-card'><h4>S DPH</h4><h2>{total_vat:,.0f} Kč</h2></div>", unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.dataframe(sel_df)
+
+        csv = sel_df.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Export CSV", data=csv, file_name="rozpocet.csv", mime='text/csv', css_class='btn-download')
+
+        # PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        elems = [Paragraph("Kalkulátor soutěžního workshopu", getSampleStyleSheet()['Heading1']), Spacer(1,12)]
+        table_data = [['Fáze','Aktivita','Jednotka','Množství','Cena','Subtotal']]
+        for _, r in sel_df.iterrows():
+            table_data.append([r['Fáze'], r['Aktivita'], r['Jednotka'], r['Množství'], f"{r['Cena']:,.0f}", f"{r['Subtotal']:,.0f}"])
+        tbl = Table(table_data)
+        tbl.setStyle(TableStyle([('GRID',(0,0),(-1,-1),0.5,colors.grey),('BACKGROUND',(0,0),(-1,0),colors.lightblue)]))
+        elems.append(tbl)
+        doc.build(elems)
+        buffer.seek(0)
+        st.download_button("📥 Export PDF", data=buffer, file_name="rozpocet.pdf", mime='application/pdf', css_class='btn-download')
+
+if __name__ == "__main__":
+    main()
