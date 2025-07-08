@@ -23,25 +23,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Data Loading ---
-# Načte se strukturovaná nabídka aktivit a fází z CSV
 @st.cache_data
-def load_activities(path='/mnt/data/Strukturovan__nab_dka.csv'):
-    df = pd.read_csv(path, sep=';', encoding='utf-8')
-    # Přejmenujeme sloupce, aby odpovídaly očekávaným názvům
-    df = df.rename(columns={
-        'Fáze': 'Fáze',
-        'Aktivita': 'Aktivita',
-        'Jednotka': 'Jednotka',
-        'Cena za jednotku': 'Cena za jednotku',
-        'MP jednotky - MEZ': 'MP jednotky - MEZ',
-        'MP jednotky - CZ': 'MP jednotky - CZ',
-        'MP+TP jednotky - MEZ': 'MP+TP jednotky - MEZ',
-        'MP+TP jednotky - CZ': 'MP+TP jednotky - CZ'
-    })
-    return df
+def load_activities(path='Strukturovan__nab_dka.csv'):
+    for p in [path, '/mount/data/Strukturovan__nab_dka.csv', '/mnt/data/Strukturovan__nab_dka.csv']:
+        try:
+            df = pd.read_csv(p, sep=',', encoding='utf-8', skipinitialspace=True)
+        except FileNotFoundError:
+            continue
+        except pd.errors.ParserError:
+            try:
+                df = pd.read_csv(p, sep=';', encoding='utf-8', skipinitialspace=True)
+            except Exception:
+                continue
+        # Remove unnamed first column
+        if df.columns[0].lower().startswith('unnamed') or df.columns[0] == '':
+            df = df.iloc[:, 1:]
+        st.sidebar.info(f"Načteno z {p}")
+        return df
+    st.error("Nepodařilo se najít nebo načíst soubor s daty aktivit.")
+    st.stop()
 
 df = load_activities()
-
 
 # --- Sidebar Controls ---
 with st.sidebar:
@@ -78,20 +80,30 @@ for phase, subdf in selected.groupby('Fáze'):
     st.markdown(f'<div class="phase-header">🏙️ {phase} — {phase_sum:,.0f} Kč</div>', unsafe_allow_html=True)
 
 # --- Progress ---
-st.progress(min(len(selected) / max(len(df),1), 1.0))
+st.progress(min(len(selected) / max(len(df), 1), 1.0))
 
 # --- Visualizations ---
 if not selected.empty:
     st.markdown('<div class="subheader">Vizualizace nákladů</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
-    c1.plotly_chart(px.pie(selected.groupby('Fáze')['Cena'].sum().reset_index(), names='Fáze', values='Cena', hole=0.4), use_container_width=True)
-    c2.plotly_chart(px.bar(selected, x='Aktivita', y='Cena', color='Fáze').update_layout(xaxis_tickangle=45), use_container_width=True)
+    c1.plotly_chart(
+        px.pie(
+            selected.groupby('Fáze')['Cena'].sum().reset_index(),
+            names='Fáze', values='Cena', hole=0.4
+        ),
+        use_container_width=True
+    )
+    c2.plotly_chart(
+        px.bar(selected, x='Aktivita', y='Cena', color='Fáze').update_layout(xaxis_tickangle=45),
+        use_container_width=True
+    )
 
 # --- Summary & Footer ---
 vat = total * 0.21
+tot_vat = total + vat
 with st.container():
     st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
-    for title, val in [('Bez DPH', total), ('DPH 21%', vat), ('S DPH', total + vat)]:
+    for title, val in [('Bez DPH', total), ('DPH 21%', vat), ('S DPH', tot_vat)]:
         st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{val:,.0f} Kč</h2></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
