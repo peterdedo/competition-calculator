@@ -412,175 +412,106 @@ activities_data = [
     }
 ]
 
-# Vytvorenie kompletnej tabuľky so všetkými variantmi a typmi
-def create_complete_dataframe():
-    complete_data = []
-    
-    for activity in activities_data:
-        # MEZ - MP
-        complete_data.append({
-            "Fáze": activity["Fáze"],
-            "Aktivita": activity["Aktivita"],
-            "Jednotka": activity["Jednotka"],
-            "Cena za jednotku": activity["Cena za jednotku"],
-            "Variant": "🇪🇺 Mezinárodní",
-            "Typ jednotek": "MP",
-            "Jednotky": activity["MP jednotky - MEZ"],
-            "Cena za aktivitu": activity["Cena MP - MEZ"],
-            "Subtotal": activity["Cena MP - MEZ"]
-        })
-        
-        # MEZ - MP+TP
-        complete_data.append({
-            "Fáze": activity["Fáze"],
-            "Aktivita": activity["Aktivita"],
-            "Jednotka": activity["Jednotka"],
-            "Cena za jednotku": activity["Cena za jednotku"],
-            "Variant": "🇪🇺 Mezinárodní",
-            "Typ jednotek": "MP+TP",
-            "Jednotky": activity["MP+TP jednotky - MEZ"],
-            "Cena za aktivitu": activity["Cena MP+TP - MEZ"],
-            "Subtotal": activity["Cena MP+TP - MEZ"]
-        })
-        
-        # CZ - MP
-        complete_data.append({
-            "Fáze": activity["Fáze"],
-            "Aktivita": activity["Aktivita"],
-            "Jednotka": activity["Jednotka"],
-            "Cena za jednotku": activity["Cena za jednotku"],
-            "Variant": "🇨🇿 Český",
-            "Typ jednotek": "MP",
-            "Jednotky": activity["MP jednotky - CZ"],
-            "Cena za aktivitu": activity["Cena MP - CZ"],
-            "Subtotal": activity["Cena MP - CZ"]
-        })
-        
-        # CZ - MP+TP
-        complete_data.append({
-            "Fáze": activity["Fáze"],
-            "Aktivita": activity["Aktivita"],
-            "Jednotka": activity["Jednotka"],
-            "Cena za jednotku": activity["Cena za jednotku"],
-            "Variant": "🇨🇿 Český",
-            "Typ jednotek": "MP+TP",
-            "Jednotky": activity["MP+TP jednotky - CZ"],
-            "Cena za aktivitu": activity["Cena MP+TP - CZ"],
-            "Subtotal": activity["Cena MP+TP - CZ"]
-        })
-    
-    return pd.DataFrame(complete_data)
+# Zobrazení aktivit s moderným dizajnom - všetky varianty a typy naraz
+selected_activities = []
+total = 0
+selected_count = 0
+total_activities = len(activities_data) * 4  # 4 kombinácie pre každú aktivitu
+faze_totals = {}
 
-# Vytvorenie kompletnej tabuľky
-df_complete = create_complete_dataframe()
+# Zoskupenie aktivít podľa fáz
+df = pd.DataFrame(activities_data)
+fazes = df["Fáze"].unique()
 
-# Zobrazenie kompletnej tabuľky
-st.markdown("""
-<div class="main-header">
-    <h2>📊 Kompletní přehled všech variant a typů aktivit</h2>
-</div>
+for faze in fazes:
+    st.markdown(f"<div class='phase-header'>{faze}</div>", unsafe_allow_html=True)
+    faze_df = df[df["Fáze"] == faze]
+    faze_total = 0
+
+    for i, row in faze_df.iterrows():
+        with st.expander(f"{row['Aktivita']}", expanded=False):
+            st.markdown(f"<div class='activity-details'>Jednotka: {row['Jednotka']}<br>"
+                        f"Cena za jednotku: <span class='price-highlight'>{row['Cena za jednotku']:,} Kč</span></div>", unsafe_allow_html=True)
+            
+            # Všetky 4 kombinácie variantov a typov
+            variants_data = [
+                {"name": "🇪🇺 Mezinárodní - MP", "variant": "MEZ", "type": "MP", "units_key": "MP jednotky - MEZ", "price_key": "Cena MP - MEZ"},
+                {"name": "🇪🇺 Mezinárodní - MP+TP", "variant": "MEZ", "type": "MP+TP", "units_key": "MP+TP jednotky - MEZ", "price_key": "Cena MP+TP - MEZ"},
+                {"name": "🇨🇿 Český - MP", "variant": "CZ", "type": "MP", "units_key": "MP jednotky - CZ", "price_key": "Cena MP - CZ"},
+                {"name": "🇨🇿 Český - MP+TP", "variant": "CZ", "type": "MP+TP", "units_key": "MP+TP jednotky - CZ", "price_key": "Cena MP+TP - CZ"}
+            ]
+            
+            for variant_data in variants_data:
+                col1, col2, col3, col4 = st.columns([2, 1, 1, 2])
+                
+                with col1:
+                    variant_class = "variant-mez" if variant_data["variant"] == "MEZ" else "variant-cz"
+                    type_class = "type-mp" if variant_data["type"] == "MP" else "type-mp-tp"
+                    
+                    st.markdown(f"""
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="variant-badge {variant_class}">{variant_data['name']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                # Získanie hodnôt pre danú kombináciu
+                jednotky_default = int(row.get(variant_data["units_key"], 0))
+                cena_za_aktivitu = row.get(variant_data["price_key"], jednotky_default * row["Cena za jednotku"])
+                cena_za_jednotku = row["Cena za jednotku"]
+                if jednotky_default > 0:
+                    cena_za_jednotku = int(cena_za_aktivitu / jednotky_default)
+                
+                with col2:
+                    jednotky = st.number_input(
+                        "Jednotek",
+                        min_value=0,
+                        value=jednotky_default,
+                        key=f"units_{faze}_{i}_{variant_data['variant']}_{variant_data['type']}"
+                    )
+                
+                with col3:
+                    st.markdown(f"**{jednotky}** {row['Jednotka']}")
+                
+                with col4:
+                    subtotal = jednotky * cena_za_jednotku
+                    st.markdown(f"**{subtotal:,} Kč**")
+                
+                if jednotky > 0:
+                    st.markdown(f"<div class='status-indicator status-selected'>✅ Aktivita vybrána</div>", unsafe_allow_html=True)
+                    selected_count += 1
+                else:
+                    st.markdown(f"<div class='status-indicator status-unselected'>⏳ Aktivita nevybrána</div>", unsafe_allow_html=True)
+                
+                if jednotky > 0:
+                    selected_activities.append({
+                        "Fáze": faze,
+                        "Aktivita": row['Aktivita'],
+                        "Variant": variant_data["name"],
+                        "Jednotka": row['Jednotka'],
+                        "Množství": jednotky,
+                        "Cena za jednotku": cena_za_jednotku,
+                        "Subtotal": subtotal
+                    })
+                    faze_total += subtotal
+                    total += subtotal
+            
+            st.markdown("---")
+    
+    if faze_total > 0:
+        faze_totals[faze] = faze_total
+        st.markdown(f"<div class='success-card'><strong>💰 Fáze {faze}:</strong> {faze_total:,} Kč</div>", unsafe_allow_html=True)
+
+# Progress bar
+progress = selected_count / total_activities
+st.markdown(f"""
+<div class="progress-bar" style="width: {progress * 100}%;"></div>
+<p style="text-align: center; color: #666; margin: 1rem 0;">
+📊 Pokrok: {selected_count}/{total_activities} aktivit vybráno ({progress:.1%})
+</p>
 """, unsafe_allow_html=True)
 
-# Filtrovanie a zobrazenie
-st.markdown("### 🔍 Filtrování a úprava")
-col1, col2 = st.columns(2)
-
-with col1:
-    selected_fazes = st.multiselect(
-        "Vyberte fáze:",
-        options=df_complete["Fáze"].unique(),
-        default=df_complete["Fáze"].unique()
-    )
-
-with col2:
-    selected_variants = st.multiselect(
-        "Vyberte varianty:",
-        options=df_complete["Variant"].unique(),
-        default=df_complete["Variant"].unique()
-    )
-
-# Filtrovanie dát
-df_filtered = df_complete[
-    (df_complete["Fáze"].isin(selected_fazes)) &
-    (df_complete["Variant"].isin(selected_variants))
-]
-
-# Zobrazenie filtrovanej tabuľky s možnosťou editácie
-st.markdown("### 📋 Detailní tabulka aktivit")
-
-# Vytvorenie editovateľnej tabuľky
-edited_df = st.data_editor(
-    df_filtered,
-    use_container_width=True,
-    num_rows="dynamic",
-    column_config={
-        "Fáze": st.column_config.TextColumn("Fáze", width="medium"),
-        "Aktivita": st.column_config.TextColumn("Aktivita", width="large"),
-        "Jednotka": st.column_config.TextColumn("Jednotka", width="small"),
-        "Cena za jednotku": st.column_config.NumberColumn("Cena za jednotku (Kč)", format="%d"),
-        "Variant": st.column_config.SelectboxColumn("Variant", options=df_complete["Variant"].unique()),
-        "Typ jednotek": st.column_config.SelectboxColumn("Typ jednotek", options=df_complete["Typ jednotek"].unique()),
-        "Jednotky": st.column_config.NumberColumn("Jednotky", format="%.1f"),
-        "Cena za aktivitu": st.column_config.NumberColumn("Cena za aktivitu (Kč)", format="%d"),
-        "Subtotal": st.column_config.NumberColumn("Subtotal (Kč)", format="%d")
-    }
-)
-
-# Výpočet celkových súm
-total_by_variant_type = edited_df.groupby(["Variant", "Typ jednotek"])["Subtotal"].sum().reset_index()
-
-st.markdown("### 💰 Celkové náklady podle variant a typů")
-
-# Zobrazenie súm v kartách
-for _, row in total_by_variant_type.iterrows():
-    variant_class = "variant-mez" if "Mezinárodní" in row["Variant"] else "variant-cz"
-    type_class = "type-mp" if row["Typ jednotek"] == "MP" else "type-mp-tp"
-    
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>{row['Variant']} - {row['Typ jednotek']}</h3>
-        <h2>{row['Subtotal']:,} Kč</h2>
-        <div style="margin-top: 0.5rem;">
-            <span class="variant-badge {variant_class}">{row['Variant']}</span>
-            <span class="type-badge {type_class}">{row['Typ jednotek']}</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Celkové súčty
-total_all = edited_df["Subtotal"].sum()
-vat_amount = total_all * 0.21
-total_with_vat = total_all * 1.21
-
-st.markdown("### 📊 Celkové součty")
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>💵 Celková suma bez DPH</h3>
-        <h2>{total_all:,} Kč</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>📊 DPH (21%)</h3>
-        <h2>{vat_amount:,} Kč</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown(f"""
-    <div class="metric-card">
-        <h3>💳 Celková suma s DPH</h3>
-        <h2>{total_with_vat:,} Kč</h2>
-    </div>
-    """, unsafe_allow_html=True)
-
 # Grafy
-if not edited_df.empty:
+if selected_activities:
     st.markdown("---")
     st.markdown("""
     <div class="main-header">
@@ -588,15 +519,18 @@ if not edited_df.empty:
     </div>
     """, unsafe_allow_html=True)
     
+    df_selected = pd.DataFrame(selected_activities)
+    
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
         <div class="chart-container">
         """, unsafe_allow_html=True)
-        # Pie chart pre varianty a typy
+        # Pie chart pre varianty
+        variant_totals = df_selected.groupby('Variant')['Subtotal'].sum().reset_index()
         fig_pie = px.pie(
-            total_by_variant_type,
+            variant_totals,
             values='Subtotal',
             names='Variant',
             title='Rozložení nákladů podle variant',
@@ -616,8 +550,9 @@ if not edited_df.empty:
         <div class="chart-container">
         """, unsafe_allow_html=True)
         # Bar chart pre fáze
+        faze_totals_df = df_selected.groupby('Fáze')['Subtotal'].sum().reset_index()
         fig_bar = px.bar(
-            edited_df.groupby('Fáze')['Subtotal'].sum().reset_index(),
+            faze_totals_df,
             x='Fáze',
             y='Subtotal',
             title='Náklady podle fází',
@@ -633,121 +568,194 @@ if not edited_df.empty:
         st.plotly_chart(fig_bar, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-# Funkcia pre generovanie PDF
-def generate_pdf_report(df_data, total_data):
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    elements = []
-    
-    # Štýly
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=16,
-        spaceAfter=30,
-        alignment=1
-    )
-    
-    # Nadpis
-    elements.append(Paragraph("🏆 Kalkulátor soutěžního workshopu", title_style))
-    elements.append(Spacer(1, 20))
-    
-    # Celkové súčty
-    elements.append(Paragraph("Celkové náklady:", styles['Heading2']))
-    elements.append(Spacer(1, 10))
-    
-    summary_data = [
-        ['Popis', 'Částka (Kč)'],
-        ['Celková suma bez DPH', f"{total_data['total']:,}"],
-        ['DPH (21%)', f"{total_data['vat']:,}"],
-        ['Celková suma s DPH', f"{total_data['total_with_vat']:,}"]
-    ]
-    
-    summary_table = Table(summary_data)
-    summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 12),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    elements.append(summary_table)
-    elements.append(Spacer(1, 20))
-    
-    # Detailná tabuľka
-    elements.append(Paragraph("Detailní přehled aktivit:", styles['Heading2']))
-    elements.append(Spacer(1, 10))
-    
-    # Príprava dát pre tabuľku
-    table_data = [['Fáze', 'Aktivita', 'Variant', 'Typ', 'Jednotky', 'Cena (Kč)']]
-    
-    for _, row in df_data.iterrows():
-        table_data.append([
-            row['Fáze'],
-            row['Aktivita'][:30] + '...' if len(row['Aktivita']) > 30 else row['Aktivita'],
-            row['Variant'],
-            row['Typ jednotek'],
-            str(row['Jednotky']),
-            f"{row['Subtotal']:,}"
-        ])
-    
-    # Vytvorenie tabuľky s limitom riadkov
-    max_rows_per_page = 25
-    for i in range(0, len(table_data), max_rows_per_page):
-        page_data = table_data[i:i + max_rows_per_page]
-        if i > 0:
-            elements.append(Spacer(1, 20))
-        
-        table = Table(page_data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
-        elements.append(table)
-    
-    # Zostavenie dokumentu
-    doc.build(elements)
-    buffer.seek(0)
-    return buffer
-
-# Export do PDF
+# Celkové výsledky s moderným dizajnom
 st.markdown("---")
 st.markdown("""
 <div class="main-header">
-    <h2>📤 Export výsledků</h2>
+    <h2>💰 Celkové náklady</h2>
 </div>
 """, unsafe_allow_html=True)
 
-if st.button("📄 Export do PDF", key="export_pdf"):
-    try:
-        total_data = {
-            'total': total_all,
-            'vat': vat_amount,
-            'total_with_vat': total_with_vat
-        }
-        
-        pdf_buffer = generate_pdf_report(edited_df, total_data)
-        
-        # Vytvorenie download linku
-        b64_pdf = base64.b64encode(pdf_buffer.getvalue()).decode()
-        href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="soutezni_workshop_rozpocet.pdf">📄 Stáhnout PDF report</a>'
-        st.markdown(href, unsafe_allow_html=True)
-        st.success("✅ PDF report byl úspěšně vygenerován!")
-        
-    except Exception as e:
-        st.error(f"❌ Chyba při generování PDF: {e}")
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown(f"""
+    <div class="metric-card">
+        <h3>💵 Celková suma bez DPH</h3>
+        <h2>{total:,} Kč</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    vat_amount = total * 0.21
+    st.markdown(f"""
+    <div class="metric-card">
+        <h3>📊 DPH (21%)</h3>
+        <h2>{vat_amount:,} Kč</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    total_with_vat = total * 1.21
+    st.markdown(f"""
+    <div class="metric-card">
+        <h3>💳 Celková suma s DPH</h3>
+        <h2>{total_with_vat:,} Kč</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown(f"""
+    <div class="metric-card">
+        <h3>📋 Počet aktivit</h3>
+        <h2>{len(selected_activities)}</h2>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Detailní přehled
+if selected_activities:
+    st.markdown("---")
+    st.markdown("""
+    <div class="main-header">
+        <h2>📋 Detailní přehled aktivit</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    df_selected = pd.DataFrame(selected_activities)
+    st.dataframe(df_selected, use_container_width=True)
+    
+    # Export s moderným dizajnem
+    st.markdown("---")
+    st.markdown("""
+    <div class="main-header">
+        <h2>📤 Export výsledků</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("📊 Export do Excel", key="export_excel"):
+            try:
+                df_selected.to_excel("soutezni_workshop_rozpocet.xlsx", index=False)
+                st.success("✅ Rozpočet byl exportován do 'soutezni_workshop_rozpocet.xlsx'")
+            except Exception as e:
+                st.error(f"❌ Chyba při exportu: {e}")
+    
+    with col2:
+        if st.button("📄 Export do PDF", key="export_pdf"):
+            try:
+                # Funkcia pre generovanie PDF
+                def generate_pdf_report(df_data, total_data):
+                    buffer = BytesIO()
+                    doc = SimpleDocTemplate(buffer, pagesize=A4)
+                    elements = []
+                    
+                    # Štýly
+                    styles = getSampleStyleSheet()
+                    title_style = ParagraphStyle(
+                        'CustomTitle',
+                        parent=styles['Heading1'],
+                        fontSize=16,
+                        spaceAfter=30,
+                        alignment=1
+                    )
+                    
+                    # Nadpis
+                    elements.append(Paragraph("🏆 Kalkulátor soutěžního workshopu", title_style))
+                    elements.append(Spacer(1, 20))
+                    
+                    # Celkové súčty
+                    elements.append(Paragraph("Celkové náklady:", styles['Heading2']))
+                    elements.append(Spacer(1, 10))
+                    
+                    summary_data = [
+                        ['Popis', 'Částka (Kč)'],
+                        ['Celková suma bez DPH', f"{total_data['total']:,}"],
+                        ['DPH (21%)', f"{total_data['vat']:,}"],
+                        ['Celková suma s DPH', f"{total_data['total_with_vat']:,}"]
+                    ]
+                    
+                    summary_table = Table(summary_data)
+                    summary_table.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                        ('FONTSIZE', (0, 0), (-1, 0), 12),
+                        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ]))
+                    elements.append(summary_table)
+                    elements.append(Spacer(1, 20))
+                    
+                    # Detailná tabuľka
+                    elements.append(Paragraph("Detailní přehled aktivit:", styles['Heading2']))
+                    elements.append(Spacer(1, 10))
+                    
+                    # Príprava dát pre tabuľku
+                    table_data = [['Fáze', 'Aktivita', 'Variant', 'Jednotky', 'Cena (Kč)']]
+                    
+                    for _, row in df_data.iterrows():
+                        table_data.append([
+                            row['Fáze'],
+                            row['Aktivita'][:30] + '...' if len(row['Aktivita']) > 30 else row['Aktivita'],
+                            row['Variant'],
+                            str(row['Množství']),
+                            f"{row['Subtotal']:,}"
+                        ])
+                    
+                    # Vytvorenie tabuľky s limitom riadkov
+                    max_rows_per_page = 25
+                    for i in range(0, len(table_data), max_rows_per_page):
+                        page_data = table_data[i:i + max_rows_per_page]
+                        if i > 0:
+                            elements.append(Spacer(1, 20))
+                        
+                        table = Table(page_data)
+                        table.setStyle(TableStyle([
+                            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                            ('FONTSIZE', (0, 0), (-1, 0), 10),
+                            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                            ('FONTSIZE', (0, 1), (-1, -1), 8),
+                            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                        ]))
+                        elements.append(table)
+                    
+                    # Zostavenie dokumentu
+                    doc.build(elements)
+                    buffer.seek(0)
+                    return buffer
+                
+                total_data = {
+                    'total': total,
+                    'vat': vat_amount,
+                    'total_with_vat': total_with_vat
+                }
+                
+                pdf_buffer = generate_pdf_report(df_selected, total_data)
+                
+                # Vytvorenie download linku
+                b64_pdf = base64.b64encode(pdf_buffer.getvalue()).decode()
+                href = f'<a href="data:application/pdf;base64,{b64_pdf}" download="soutezni_workshop_rozpocet.pdf">📄 Stáhnout PDF report</a>'
+                st.markdown(href, unsafe_allow_html=True)
+                st.success("✅ PDF report byl úspěšně vygenerován!")
+                
+            except Exception as e:
+                st.error(f"❌ Chyba při generování PDF: {e}")
+
+else:
+    st.markdown("""
+    <div class="warning-card">
+        <h3>⚠️ Vyberte alespoň jednu aktivitu pro zobrazení celkových nákladů</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Footer s moderným dizajnom
 st.markdown("---")
@@ -756,4 +764,4 @@ st.markdown("""
     <p>🏆 Kalkulátor soutěžního workshopu | Vytvořeno pomocí Streamlit</p>
     <p>{}</p>
 </div>
-""".format(datetime.now().strftime("%d.%m.%Y %H:%M")), unsafe_allow_html=True) 
+""".format(datetime.now().strftime("%d.%m.%Y %H:%M")), unsafe_allow_html=True)
