@@ -4,104 +4,265 @@ import plotly.express as px
 from datetime import datetime
 from io import BytesIO
 
-# --- Moderný dizajn a sticky horný panel ---
-st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon=":bar_chart:", layout="wide")
+# --- Moderný dizajn inšpirovaný architektúrou a urbanizmom ---
+st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon=":building_construction:", layout="wide")
 
 st.markdown("""
 <style>
+    /* Architektonické fonty a základné nastavenia */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     .main-header {
         position: sticky;
         top: 0;
         z-index: 100;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1f4e79 100%);
+        padding: 2rem;
+        border-radius: 0;
+        margin-bottom: 2rem;
         color: white;
         text-align: center;
-        font-size: 1.4rem;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
+        font-family: 'Inter', sans-serif;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        border-bottom: 4px solid #e74c3c;
+        position: relative;
+        overflow: hidden;
     }
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%),
+            repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);
+        pointer-events: none;
+    }
+    
     .sticky-summary {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100vw;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 25%, #3498db 50%, #2980b9 75%, #1f4e79 100%);
         color: white;
         text-align: center;
-        padding: 1.2rem 0.5rem 0.8rem 0.5rem;
+        padding: 1.5rem 0.5rem 1rem 0.5rem;
         z-index: 9999;
-        font-size: 1.3rem;
-        box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+        font-family: 'Inter', sans-serif;
+        font-size: 1.4rem;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+        border-top: 4px solid #e74c3c;
         backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(255,255,255,0.2);
     }
+    
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 20px;
-        color: white;
+        background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+        padding: 2rem;
+        border-radius: 0;
+        color: #2c3e50;
         text-align: center;
-        margin: 0.8rem 0;
+        margin: 1rem 0;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.2);
+        border-left: 6px solid #3498db;
+        font-family: 'Inter', sans-serif;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+    }
+    
     .metric-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 12px 40px rgba(0,0,0,0.2);
     }
+    
     .phase-header {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 1rem 1.5rem;
-        border-radius: 15px;
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 0;
         color: white;
-        margin: 1rem 0 0.5rem 0;
-        font-size: 1.2rem;
+        margin: 1.5rem 0 1rem 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.3rem;
         font-weight: 600;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border-left: 8px solid #e74c3c;
+        position: relative;
     }
+    
+    .phase-header::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 0 50px 50px;
+        border-color: transparent transparent #e74c3c transparent;
+    }
+    
     .sidebar-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem;
-        border-radius: 15px;
-        color: white;
-        margin-bottom: 1rem;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    .chart-container {
-        background: rgba(255,255,255,0.05);
-        border-radius: 15px;
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         padding: 1.5rem;
-        margin: 1rem 0;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 0;
+        color: white;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border-bottom: 4px solid #3498db;
     }
+    
+    .chart-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 0;
+        padding: 2rem;
+        margin: 1.5rem 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 2px solid #dee2e6;
+        position: relative;
+    }
+    
+    .chart-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+    }
+    
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
         color: white;
         border: none;
-        border-radius: 25px;
-        padding: 0.8rem 2rem;
-        font-weight: bold;
+        border-radius: 0;
+        padding: 1rem 2.5rem;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        border-bottom: 4px solid #e74c3c;
+        text-transform: uppercase;
+        letter-spacing: 1px;
     }
+    
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     }
+    
     .progress-bar {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background: linear-gradient(90deg, #3498db 0%, #e74c3c 25%, #f39c12 50%, #27ae60 75%, #9b59b6 100%);
         height: 8px;
-        border-radius: 4px;
+        border-radius: 0;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    /* Urbanistické mriežky */
+    .grid-pattern {
+        background-image: 
+            linear-gradient(rgba(52, 152, 219, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(52, 152, 219, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+    
+    /* Architektonické stĺpce */
+    .column-architectural {
+        background: linear-gradient(180deg, #ecf0f1 0%, #bdc3c7 100%);
+        border-left: 4px solid #3498db;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        position: relative;
+    }
+    
+    .column-architectural::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, #3498db, #e74c3c);
+    }
+    
+    /* Moderné karty s architektonickými prvkami */
+    .architectural-card {
+        background: white;
+        border-radius: 0;
+        padding: 2rem;
         margin: 1rem 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 2px solid #dee2e6;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .architectural-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #3498db, #e74c3c, #f39c12, #27ae60);
+    }
+    
+    /* Urbanistické ikony a prvky */
+    .urban-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(45deg, #3498db, #e74c3c);
+        margin-right: 8px;
+        border-radius: 2px;
+    }
+    
+    /* Responsívny dizajn */
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 1.2rem;
+            padding: 1.5rem;
+        }
+        
+        .metric-card {
+            padding: 1.5rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -110,11 +271,21 @@ st.markdown("""
 <div class="main-header">
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
+    <div style="font-size: 0.9rem; opacity: 0.9; margin-top: 1rem;">
+        <span class="urban-icon"></span>Urbanistické riešenia
+        <span class="urban-icon"></span>Architektonické inovácie
+        <span class="urban-icon"></span>Mestské plánovanie
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar ---
-st.sidebar.header("Nastavenia")
+# --- Sidebar s architektonickým dizajnom ---
+st.sidebar.markdown("""
+<div class="sidebar-header">
+    <h3>Nastavenia projektu</h3>
+</div>
+""", unsafe_allow_html=True)
+
 variant = st.sidebar.radio(
     "Vyberte variantu:",
     ["Mezinárodní soutěžní workshop", "Soutěžní workshop v češtině"],
@@ -341,7 +512,13 @@ df_filtered["Množství"] = df_filtered[jednotky_key]
 df_filtered["Cena za jednotku"] = df_filtered[cena_key]
 df_filtered["Subtotal"] = df_filtered["Množství"] * df_filtered["Cena za jednotku"]
 
-# --- Interaktívna tabuľka s výberom ---
+# --- Interaktívna tabuľka s architektonickým dizajnom ---
+st.markdown("""
+<div class="architectural-card">
+    <h3>Detailní přehled aktivit</h3>
+</div>
+""", unsafe_allow_html=True)
+
 edited_df = st.data_editor(
     df_filtered[["Vybrané", "Fáze", "Aktivita", "Jednotka", "Množství", "Cena za jednotku", "Subtotal", "Poznámka"]],
     column_config={
@@ -373,9 +550,14 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Moderné grafy ---
+# --- Moderné grafy s architektonickým dizajnom ---
 st.markdown("---")
-st.subheader("Vizualizace nákladů (len vybrané aktivity)")
+st.markdown("""
+<div class="architectural-card">
+    <h3>Vizualizace nákladů (len vybrané aktivity)</h3>
+</div>
+""", unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
     fig_sunburst = px.sunburst(
@@ -383,11 +565,16 @@ with col1:
         path=['Fáze', 'Aktivita'],
         values='Subtotal',
         color='Fáze',
-        color_discrete_sequence=px.colors.qualitative.Pastel,
+        color_discrete_sequence=['#2c3e50', '#34495e', '#3498db', '#2980b9', '#1f4e79', '#e74c3c', '#f39c12'],
         title='Hierarchické rozloženie nákladov',
         hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
     )
     fig_sunburst.update_traces(insidetextorientation='radial')
+    fig_sunburst.update_layout(
+        font=dict(family="Inter", size=12),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig_sunburst, use_container_width=True)
 with col2:
     fig_bar = px.bar(
@@ -396,15 +583,25 @@ with col2:
         y='Subtotal',
         title='Náklady podľa aktivít',
         color='Fáze',
-        color_discrete_sequence=px.colors.sequential.Purples,
+        color_discrete_sequence=['#2c3e50', '#34495e', '#3498db', '#2980b9', '#1f4e79', '#e74c3c', '#f39c12'],
         hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
     )
     fig_bar.update_xaxes(tickangle=45)
+    fig_bar.update_layout(
+        font=dict(family="Inter", size=12),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig_bar, use_container_width=True)
 
-# --- Export ---
+# --- Export s architektonickým dizajnom ---
 st.markdown("---")
-st.subheader("Export výsledků (len vybrané aktivity)")
+st.markdown("""
+<div class="architectural-card">
+    <h3>Export výsledků (len vybrané aktivity)</h3>
+</div>
+""", unsafe_allow_html=True)
+
 col1, col2 = st.columns(2)
 with col1:
     excel_buffer = BytesIO()
@@ -418,6 +615,18 @@ with col1:
 with col2:
     st.info("Export do PDF bude čoskoro dostupný v ďalšej verzii.")
 
-# --- Footer ---
+# --- Footer s architektonickým dizajnom ---
 st.markdown("---")
-st.markdown(f"<div style='text-align: center; color: #666; padding: 2rem;'>Kalkulátor soutěžního workshopu | {datetime.now().strftime('%d.%m.%Y %H:%M')}</div>", unsafe_allow_html=True)
+st.markdown(f"""
+<div style='text-align: center; color: #2c3e50; padding: 2rem; font-family: "Inter", sans-serif;'>
+    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
+        Kalkulátor soutěžního workshopu
+    </div>
+    <div style="font-size: 0.9rem; opacity: 0.7;">
+        Urbanistické riešenia | Architektonické inovácie | Mestské plánovanie
+    </div>
+    <div style="font-size: 0.8rem; opacity: 0.5; margin-top: 0.5rem;">
+        {datetime.now().strftime('%d.%m.%Y %H:%M')}
+    </div>
+</div>
+""", unsafe_allow_html=True)
