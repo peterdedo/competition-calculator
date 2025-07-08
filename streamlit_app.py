@@ -13,47 +13,95 @@ st.markdown("""
         position: sticky;
         top: 0;
         z-index: 100;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        padding: 1.2rem;
-        border-radius: 10px;
-        margin-bottom: 1.2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 1.5rem;
         color: white;
         text-align: center;
-        font-size: 1.3rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        font-size: 1.4rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
     }
     .sticky-summary {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100vw;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         color: white;
         text-align: center;
-        padding: 1rem 0.5rem 0.5rem 0.5rem;
+        padding: 1.2rem 0.5rem 0.8rem 0.5rem;
         z-index: 9999;
-        font-size: 1.2rem;
-        box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+        font-size: 1.3rem;
+        box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255,255,255,0.2);
     }
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.2rem;
-        border-radius: 15px;
+        padding: 1.5rem;
+        border-radius: 20px;
         color: white;
         text-align: center;
-        margin: 0.5rem 0;
+        margin: 0.8rem 0;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .variant-selector {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        padding: 1rem;
-        border-radius: 10px;
-        margin: 1rem 0;
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+    }
+    .phase-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
         color: white;
+        margin: 1rem 0 0.5rem 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
     }
-    .note-cell {
-        background: #fffbe6;
-        border-radius: 5px;
-        padding: 0.2rem 0.5rem;
+    .sidebar-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 15px;
+        color: white;
+        margin-bottom: 1rem;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .chart-container {
+        background: rgba(255,255,255,0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.8rem 2rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .progress-bar {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        height: 8px;
+        border-radius: 4px;
+        margin: 1rem 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -62,10 +110,11 @@ st.markdown("""
 <div class="main-header">
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
+    <div style="font-size: 0.9rem; opacity: 0.9;">✨ Optimalizováno pre najlepšie UX</div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar: variant, jednotky, filter fázy, reset ---
+# --- Sidebar ---
 st.sidebar.header("Nastavenia")
 variant = st.sidebar.radio(
     "Vyberte variantu:",
@@ -78,7 +127,7 @@ unit_type = st.sidebar.radio(
     help="Vyberte, či chcete počítať len MP alebo aj transformačné plochy."
 )
 
-# --- Kompletné dáta z tabuľky (opravené) ---
+# --- Dáta ---
 activities_data = [
     # Analytická fáze
     {"Fáze": "Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Jednotka": "den", "Cena za jednotku": 14000.0,
@@ -264,9 +313,9 @@ activities_data = [
      "Cena MP - MEZ": 0, "Cena MP - CZ": 2250000, "Cena MP+TP - MEZ": 0, "Cena MP+TP - CZ": 2250000}
 ]
 
-# --- Vytvorenie DataFrame s opravou None hodnôt ---
+# --- DataFrame ---
 df = pd.DataFrame(activities_data)
-df = df.fillna(0)  # Nahradenie None hodnôt 0
+df = df.fillna(0)
 df["Poznámka"] = ""
 
 # --- Filtrovanie podľa fázy ---
@@ -320,27 +369,32 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Grafy ---
+# --- Moderné grafy ---
 st.markdown("---")
 st.subheader("Vizualizace nákladů")
 col1, col2 = st.columns(2)
 with col1:
-    fig_pie = px.pie(
-        edited_df.groupby('Fáze')['Subtotal'].sum().reset_index(),
+    # Sunburst graf pre hierarchické rozloženie nákladov
+    fig_sunburst = px.sunburst(
+        edited_df,
+        path=['Fáze', 'Aktivita'],
         values='Subtotal',
-        names='Fáze',
-        title='Rozložení nákladů podle fází',
-        color_discrete_sequence=px.colors.sequential.Purples
+        color='Fáze',
+        color_discrete_sequence=px.colors.qualitative.Pastel,
+        title='Hierarchické rozloženie nákladov',
+        hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
     )
-    st.plotly_chart(fig_pie, use_container_width=True)
+    fig_sunburst.update_traces(insidetextorientation='radial')
+    st.plotly_chart(fig_sunburst, use_container_width=True)
 with col2:
     fig_bar = px.bar(
         edited_df,
         x='Aktivita',
         y='Subtotal',
         color='Fáze',
-        title='Náklady podle aktivit',
-        color_discrete_sequence=px.colors.sequential.Purples
+        title='Náklady podľa aktivít',
+        color_discrete_sequence=px.colors.sequential.Purples,
+        hover_data={'Subtotal':':,.0f', 'Množství':True, 'Cena za jednotku':True, 'Poznámka':True}
     )
     fig_bar.update_xaxes(tickangle=45)
     st.plotly_chart(fig_bar, use_container_width=True)
