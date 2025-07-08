@@ -23,16 +23,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Data Loading ---
+# Načte se strukturovaná nabídka aktivit a fází z CSV
 @st.cache_data
-def load_data(path='activities.csv'):
-    try:
-        df = pd.read_csv(path)
-    except FileNotFoundError:
-        st.error(f"Chybí soubor '{path}' s daty aktivit. Vytvořte ho z původního seznamu.")
-        st.stop()
+def load_activities(path='/mnt/data/Strukturovan__nab_dka.csv'):
+    df = pd.read_csv(path, sep=';', encoding='utf-8')
+    # Přejmenujeme sloupce, aby odpovídaly očekávaným názvům
+    df = df.rename(columns={
+        'Fáze': 'Fáze',
+        'Aktivita': 'Aktivita',
+        'Jednotka': 'Jednotka',
+        'Cena za jednotku': 'Cena za jednotku',
+        'MP jednotky - MEZ': 'MP jednotky - MEZ',
+        'MP jednotky - CZ': 'MP jednotky - CZ',
+        'MP+TP jednotky - MEZ': 'MP+TP jednotky - MEZ',
+        'MP+TP jednotky - CZ': 'MP+TP jednotky - CZ'
+    })
     return df
 
-df = load_data()
+df = load_activities()
+
 
 # --- Sidebar Controls ---
 with st.sidebar:
@@ -45,7 +54,7 @@ with st.sidebar:
 # --- Header ---
 st.markdown('<div class="main-header">Kalkulátor soutěžního workshopu</div>', unsafe_allow_html=True)
 
-# --- Filter & keys ---
+# --- Filter & Keys ---
 df = df[df["Fáze"].isin(phases)]
 if search:
     df = df[df["Aktivita"].str.contains(search, case=False, na=False)]
@@ -53,40 +62,36 @@ vkey = "MEZ" if variant.startswith("Mezinárodní") else "CZ"
 ukey = unit_type.replace(" ", "") + " jednotky"
 unit_col = f"{ukey} - {vkey}"
 
-# --- Quantity Input Table via Data Editor ---
-# Prepare editable table: default quantities column
+# --- Quantity Input Table ---
 df = df.rename(columns={unit_col: 'Množství'})
 df['Množství'] = df['Množství'].fillna(0)
 edited = st.experimental_data_editor(df[['Fáze','Aktivita','Jednotka','Cena za jednotku','Množství']], num_rows="dynamic")
 
-# --- Calculate costs ---
+# --- Calculate Costs ---
 edited['Cena'] = edited['Množství'] * edited['Cena za jednotku']
-selected = edited[edited['Množství']>0]
-
+selected = edited[edited['Množství'] > 0]
 total = selected['Cena'].sum()
 
-# --- Phase summaries ---
+# --- Phase Summaries ---
 for phase, subdf in selected.groupby('Fáze'):
     phase_sum = subdf['Cena'].sum()
     st.markdown(f'<div class="phase-header">🏙️ {phase} — {phase_sum:,.0f} Kč</div>', unsafe_allow_html=True)
 
 # --- Progress ---
-st.progress(min(len(selected)/len(df),1.0))
+st.progress(min(len(selected) / max(len(df),1), 1.0))
 
 # --- Visualizations ---
 if not selected.empty:
     st.markdown('<div class="subheader">Vizualizace nákladů</div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
-    c1.plotly_chart(px.pie(selected.groupby('Fáze')['Cena'].sum().reset_index(),
-                            names='Fáze',values='Cena',hole=0.4), use_container_width=True)
-    c2.plotly_chart(px.bar(selected,x='Aktivita',y='Cena',color='Fáze')
-                    .update_layout(xaxis_tickangle=45),use_container_width=True)
+    c1.plotly_chart(px.pie(selected.groupby('Fáze')['Cena'].sum().reset_index(), names='Fáze', values='Cena', hole=0.4), use_container_width=True)
+    c2.plotly_chart(px.bar(selected, x='Aktivita', y='Cena', color='Fáze').update_layout(xaxis_tickangle=45), use_container_width=True)
 
 # --- Summary & Footer ---
 vat = total * 0.21
 with st.container():
     st.markdown('<div class="metric-grid">', unsafe_allow_html=True)
-    for title, val in [('Bez DPH', total),('DPH 21%', vat),('S DPH', total+vat)]:
+    for title, val in [('Bez DPH', total), ('DPH 21%', vat), ('S DPH', total + vat)]:
         st.markdown(f'<div class="metric-card"><h3>{title}</h3><h2>{val:,.0f} Kč</h2></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
