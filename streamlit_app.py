@@ -221,7 +221,7 @@ st.markdown("""
     <div class="hero-bg"></div>
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
-    <div class="brand-logo">4ct platform</div>
+    <div class="brand-logo">4CT Platform</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -538,45 +538,52 @@ phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum().reindex(pha
 # --- Optimalizované grafy ---
 st.markdown("""
 <div class="chart-container">
-            <h3 style="text-align: center; color: #059669; margin-bottom: 2rem;">Vizualizace nákladů</h3>
+    <h3 style="text-align: center; color: #059669; margin-bottom: 2rem;">Vizualizace nákladů</h3>
 </div>
 """, unsafe_allow_html=True)
 
 # Sunburst chart - hierarchie fázy -> aktivity
-fig_sunburst = px.sunburst(
-    selected_activities,
-    path=['Fáze', 'Aktivita'],
-    values='Náklady',
-    title="Hierarchické rozložení nákladů",
-    color='Fáze',
-    color_discrete_map={
-        'Analytická fáze': '#059669',
-        'Přípravní fáze': '#10b981',
-        'Průběh soutěžního workshopu (SW)': '#dc2626',
-        'Vyhlášení výsledků SW': '#7c3aed',
-        'PR podpora v průběhu celé soutěže': '#ea580c',
-        'Další náklady - externí dodavatelé': '#0891b2',
-        'Odměny': '#be185d'
-    }
-)
-fig_sunburst.update_layout(
-    title_x=0.5,
-    title_font_size=22,
-    title_font_color='#059669',
-    height=700,
-    margin=dict(t=80, l=0, r=0, b=0),
-    paper_bgcolor='rgba(255,255,255,0.98)',
-    font=dict(family='Inter, sans-serif', size=18, color='#1e2937')
-)
-fig_sunburst.update_traces(
-    hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
-    marker=dict(line=dict(width=3, color='white')),
-    insidetextorientation='radial',
-    textfont_size=16,
-    textfont_color='white',
-    textfont_family='Inter, sans-serif'
-)
-st.plotly_chart(fig_sunburst, use_container_width=True)
+if len(selected_activities) > 0:
+    fig_sunburst = px.sunburst(
+        selected_activities,
+        path=['Fáze', 'Aktivita'],
+        values='Náklady',
+        title="Hierarchické rozložení nákladů",
+        color='Fáze',
+        color_discrete_map={
+            'Analytická fáze': '#059669',
+            'Přípravní fáze': '#10b981',
+            'Průběh soutěžního workshopu (SW)': '#dc2626',
+            'Vyhlášení výsledků SW': '#7c3aed',
+            'PR podpora v průběhu celé soutěže': '#ea580c',
+            'Další náklady - externí dodavatelé': '#0891b2',
+            'Odměny': '#be185d'
+        }
+    )
+    fig_sunburst.update_layout(
+        title_x=0.5,
+        title_font_size=22,
+        title_font_color='#059669',
+        height=700,
+        margin=dict(t=80, l=0, r=0, b=0),
+        paper_bgcolor='rgba(255,255,255,0.98)',
+        font=dict(family='Inter, sans-serif', size=18, color='#1e2937')
+    )
+    fig_sunburst.update_traces(
+        hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
+        marker=dict(line=dict(width=3, color='white')),
+        insidetextorientation='radial',
+        textfont_size=16,
+        textfont_color='white',
+        textfont_family='Inter, sans-serif'
+    )
+    st.plotly_chart(fig_sunburst, use_container_width=True)
+else:
+    st.markdown("""
+    <div style="text-align: center; padding: 3rem; color: #6b7280; font-size: 1.1rem;">
+        <p>Žádné aktivity nejsou vybrány. Vyberte alespoň jednu aktivitu pro zobrazení grafu.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- Export ---
 st.markdown("""
