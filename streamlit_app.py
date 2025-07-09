@@ -12,13 +12,13 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
     html, body, .main { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important; font-family: 'Inter', sans-serif; }
     .main-header {
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 40%, #60a5fa 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 40%, #34d399 100%);
         padding: 4rem 2rem 2.5rem 2rem;
         margin: -2rem -2rem 2.5rem -2rem;
         color: white;
         text-align: center;
         border-radius: 0 0 2.5rem 2.5rem;
-        box-shadow: 0 12px 48px rgba(30,58,138,0.18);
+        box-shadow: 0 12px 48px rgba(5,150,105,0.18);
         position: relative;
         overflow: hidden;
     }
@@ -27,7 +27,7 @@ st.markdown("""
         font-weight: 900;
         margin-bottom: 0.5rem;
         letter-spacing: -0.03em;
-        text-shadow: 0 2px 16px rgba(30,58,138,0.12);
+        text-shadow: 0 2px 16px rgba(5,150,105,0.12);
     }
     .main-header p {
         font-size: 1.25rem;
@@ -44,17 +44,17 @@ st.markdown("""
         font-size: 1.1rem;
         margin-top: 1.5rem;
         letter-spacing: 0.08em;
-        box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+        box-shadow: 0 2px 12px rgba(5,150,105,0.08);
     }
     .main-header .hero-bg {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect fill="none"/><circle cx="80" cy="80" r="60" fill="%233b82f6" fill-opacity="0.08"/><circle cx="90%" cy="30" r="80" fill="%231e3a8a" fill-opacity="0.06"/><rect x="60%" y="60%" width="120" height="120" rx="30" fill="%2360a5fa" fill-opacity="0.07"/></svg>');
+        background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect fill="none"/><circle cx="80" cy="80" r="60" fill="%2310b981" fill-opacity="0.08"/><circle cx="90%" cy="30" r="80" fill="%23059669" fill-opacity="0.06"/><rect x="60%" y="60%" width="120" height="120" rx="30" fill="%2334d399" fill-opacity="0.07"/></svg>');
         z-index: 0;
         pointer-events: none;
     }
     .sidebar-header {
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         padding: 2rem 1rem 1.5rem 1rem;
         border-radius: 1.5rem;
         color: white;
@@ -62,7 +62,7 @@ st.markdown("""
         text-align: center;
         font-weight: 700;
         font-size: 1.2rem;
-        box-shadow: 0 4px 24px rgba(30,58,138,0.10);
+        box-shadow: 0 4px 24px rgba(5,150,105,0.10);
         position: sticky;
         top: 1.5rem;
         z-index: 10;
@@ -77,26 +77,26 @@ st.markdown("""
         color: #1e2937;
         text-align: center;
         margin: 1rem 0;
-        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
         border: 1.5px solid #e5e7eb;
         position: relative;
         overflow: hidden;
         transition: box-shadow 0.2s, transform 0.2s;
     }
     .metric-card:hover {
-        box-shadow: 0 8px 32px rgba(30,58,138,0.16);
+        box-shadow: 0 8px 32px rgba(5,150,105,0.16);
         transform: translateY(-2px) scale(1.01);
     }
     .metric-card h3 {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #3b82f6;
+        color: #10b981;
         margin-bottom: 0.2rem;
     }
     .metric-card h2 {
         font-size: 2.2rem;
         font-weight: 900;
-        color: #1e3a8a;
+        color: #059669;
         margin: 0.2rem 0 0.1rem 0;
         letter-spacing: -0.02em;
     }
@@ -106,15 +106,15 @@ st.markdown("""
         margin: 0;
     }
     .phase-header {
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         padding: 1.5rem 2rem;
         border-radius: 1.2rem;
         color: white;
         margin: 2rem 0 1.2rem 0;
         font-weight: 700;
         font-size: 1.3rem;
-        box-shadow: 0 4px 20px rgba(30,58,138,0.10);
-        border-left: 8px solid #60a5fa;
+        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
+        border-left: 8px solid #34d399;
         position: relative;
     }
     .chart-container {
@@ -122,12 +122,12 @@ st.markdown("""
         border-radius: 1.5rem;
         padding: 2.5rem 2rem 2rem 2rem;
         margin: 2rem 0;
-        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
         border: 1.5px solid #e5e7eb;
         position: relative;
     }
     .stButton > button {
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         color: white;
         border: none;
         border-radius: 1rem;
@@ -135,23 +135,23 @@ st.markdown("""
         font-weight: 700;
         font-size: 1.1rem;
         transition: all 0.2s;
-        box-shadow: 0 4px 20px rgba(30,58,138,0.10);
+        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
         text-transform: none;
         letter-spacing: 0.02em;
     }
     .stButton > button:hover {
         transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 8px 32px rgba(30,58,138,0.18);
-        background: linear-gradient(120deg, #2563eb 0%, #60a5fa 100%);
+        box-shadow: 0 8px 32px rgba(5,150,105,0.18);
+        background: linear-gradient(120deg, #047857 0%, #34d399 100%);
     }
     .progress-bar {
-        background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
         height: 8px;
         border-radius: 4px;
         margin: 2rem 0 1.5rem 0;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(30,58,138,0.10);
+        box-shadow: 0 2px 8px rgba(5,150,105,0.10);
     }
     .progress-bar::after {
         content: '';
@@ -172,14 +172,14 @@ st.markdown("""
         bottom: 0;
         left: 0;
         width: 100vw;
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         color: white;
         text-align: center;
         padding: 1.2rem 0.5rem 1rem 0.5rem;
         z-index: 9999;
         font-weight: 700;
         font-size: 1.25rem;
-        box-shadow: 0 -4px 24px rgba(30,58,138,0.12);
+        box-shadow: 0 -4px 24px rgba(5,150,105,0.12);
         border-top-left-radius: 1.5rem;
         border-top-right-radius: 1.5rem;
         letter-spacing: 0.02em;
@@ -188,11 +188,11 @@ st.markdown("""
     .dataframe {
         border-radius: 1.2rem;
         overflow: hidden;
-        box-shadow: 0 4px 24px rgba(30,58,138,0.08);
+        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
         border: 1.5px solid #e5e7eb;
     }
     .dataframe th {
-        background: linear-gradient(120deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         color: white;
         font-weight: 700;
         padding: 1rem;
@@ -441,7 +441,7 @@ else:
 if unit_type == "Počet jednotek (změna MP)":
     unit_col = f"Počet MJ (MP) - {variant_suffix}"
     price_col = f"Cena (MP) - {variant_suffix}"
-else:
+        else:
     unit_col = f"Počet MJ (MP+T) - {variant_suffix}"
     price_col = f"Cena (MP+T) - {variant_suffix}"
 
@@ -465,7 +465,7 @@ filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
 # --- KPI cards ---
 col1, col2, col3 = st.columns(3)
-with col1:
+                    with col1:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Celkové náklady</h3>
@@ -473,7 +473,7 @@ with col1:
         <p>Celková suma</p>
     </div>
     """, unsafe_allow_html=True)
-with col2:
+                        with col2:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Počet aktivit</h3>
@@ -481,7 +481,7 @@ with col2:
         <p>Celkový počet</p>
     </div>
     """, unsafe_allow_html=True)
-with col3:
+                        with col3:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Průměrná cena</h3>
@@ -538,7 +538,7 @@ phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum().reindex(pha
 # --- Optimalizované grafy ---
 st.markdown("""
 <div class="chart-container">
-    <h3 style="text-align: center; color: #1e3a8a; margin-bottom: 2rem;">Vizualizace nákladů</h3>
+            <h3 style="text-align: center; color: #059669; margin-bottom: 2rem;">Vizualizace nákladů</h3>
 </div>
 """, unsafe_allow_html=True)
 
@@ -562,7 +562,7 @@ fig_sunburst = px.sunburst(
 fig_sunburst.update_layout(
     title_x=0.5,
     title_font_size=22,
-    title_font_color='#1e3a8a',
+    title_font_color='#059669',
     height=700,
     margin=dict(t=80, l=0, r=0, b=0),
     paper_bgcolor='rgba(255,255,255,0.98)',
