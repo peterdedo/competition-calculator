@@ -465,7 +465,7 @@ filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
 # --- KPI cards ---
 col1, col2, col3 = st.columns(3)
-                    with col1:
+with col1:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Celkové náklady</h3>
@@ -473,7 +473,7 @@ col1, col2, col3 = st.columns(3)
         <p>Celková suma</p>
     </div>
     """, unsafe_allow_html=True)
-                        with col2:
+with col2:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Počet aktivit</h3>
@@ -481,7 +481,7 @@ col1, col2, col3 = st.columns(3)
         <p>Celkový počet</p>
     </div>
     """, unsafe_allow_html=True)
-                        with col3:
+with col3:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Průměrná cena</h3>
