@@ -550,8 +550,8 @@ fig_sunburst = px.sunburst(
     title="Hierarchické rozložení nákladů",
     color='Fáze',
     color_discrete_map={
-        'Analytická fáze': '#1e3a8a',
-        'Přípravní fáze': '#059669',
+        'Analytická fáze': '#059669',
+        'Přípravní fáze': '#10b981',
         'Průběh soutěžního workshopu (SW)': '#dc2626',
         'Vyhlášení výsledků SW': '#7c3aed',
         'PR podpora v průběhu celé soutěže': '#ea580c',
