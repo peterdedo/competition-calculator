@@ -437,11 +437,11 @@ if variant == "Mezinárodní soutěžní workshop":
     variant_suffix = "EN"
 else:
     variant_suffix = "CZ"
-        
+
 if unit_type == "Počet jednotek (změna MP)":
     unit_col = f"Počet MJ (MP) - {variant_suffix}"
     price_col = f"Cena (MP) - {variant_suffix}"
-        else:
+else:
     unit_col = f"Počet MJ (MP+T) - {variant_suffix}"
     price_col = f"Cena (MP+T) - {variant_suffix}"
 
