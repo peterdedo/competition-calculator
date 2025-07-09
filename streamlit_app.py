@@ -657,48 +657,56 @@ st.markdown("""
     <h3>Export dat</h3>
 </div>
 """, unsafe_allow_html=True)
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("Export do Excel", type="primary"):
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
-            if len(selected_activities) > 0:
-                avg_cost = total_selected_cost / len(selected_activities)
-            else:
-                avg_cost = 0
-            summary_data = {
-                'Metrika': ['Celkové náklady', 'Počet aktivit', 'Průměrná cena na aktivitu'],
-                'Hodnota': [
-                    f"{total_selected_cost:,.0f} Kč",
-                    len(selected_activities),
-                    f"{avg_cost:,.0f} Kč"
-                ]
-            }
-            summary_df = pd.DataFrame(summary_data)
-            summary_df.to_excel(writer, sheet_name='Shrnutí', index=False)
-        output.seek(0)
-        st.download_button(
-            label="Stáhnout Excel soubor",
-            data=output.getvalue(),
-            file_name=f"kalkulace_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-with col2:
-    if st.button("Export do PDF", type="primary"):
+
+# Excel Export
+if st.button("📊 Export do Excel", type="primary", use_container_width=True):
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
         if len(selected_activities) > 0:
+            avg_cost = total_selected_cost / len(selected_activities)
+        else:
+            avg_cost = 0
+        summary_data = {
+            'Metrika': ['Celkové náklady', 'Počet aktivit', 'Průměrná cena na aktivitu'],
+            'Hodnota': [
+                f"{total_selected_cost:,.0f} Kč",
+                len(selected_activities),
+                f"{avg_cost:,.0f} Kč"
+            ]
+        }
+        summary_df = pd.DataFrame(summary_data)
+        summary_df.to_excel(writer, sheet_name='Shrnutí', index=False)
+    output.seek(0)
+    st.download_button(
+        label="📥 Stáhnout Excel soubor",
+        data=output.getvalue(),
+        file_name=f"kalkulace_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
+
+# PDF Export
+if st.button("📄 Export do PDF", type="primary", use_container_width=True):
+    if len(selected_activities) > 0:
+        try:
             pdf_buffer = generate_invoice_pdf(selected_activities, total_selected_cost, variant, unit_type)
             st.download_button(
-                label="Stáhnout PDF faktúru",
+                label="📥 Stáhnout PDF faktúru",
                 data=pdf_buffer.getvalue(),
                 file_name=f"faktura_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                mime="application/pdf"
+                mime="application/pdf",
+                use_container_width=True
             )
-        else:
-            st.error("Pro export do PDF je potřeba vybrat alespoň jednu aktivitu.")
-with col3:
-    if st.button("Reset hodnot"):
-        st.rerun()
+            st.success("✅ PDF faktúra byla úspěšně vygenerována!")
+        except Exception as e:
+            st.error(f"❌ Chyba při generování PDF: {str(e)}")
+    else:
+        st.error("❌ Pro export do PDF je potřeba vybrat alespoň jednu aktivitu.")
+
+# Reset
+if st.button("🔄 Reset hodnot", use_container_width=True):
+    st.rerun()
 
 # --- Sticky summary ---
 if len(selected_activities) > 0:
