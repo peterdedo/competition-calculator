@@ -221,7 +221,7 @@ st.markdown("""
     <div class="hero-bg"></div>
     <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
-    <div class="brand-logo">4CT Platform</div>
+    <div class="brand-logo">4ct Platform</div>
 </div>
 """, unsafe_allow_html=True)
 
