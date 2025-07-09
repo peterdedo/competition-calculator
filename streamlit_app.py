@@ -49,39 +49,62 @@ PAGE_CONFIG = {
 # --- Dáta aktivít ---
 ACTIVITIES_DATA = [
     # Analytická fáze
-    {'Fáze': 'Analytická fáze', 'Aktivita': 'Analýza zadání soutěže', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
-    {'Fáze': 'Analytická fáze', 'Aktivita': 'Průzkum lokality', 'Množství': 1, 'Cena za jednotku': 8000, 'Jednotka': 'ks'},
-    {'Fáze': 'Analytická fáze', 'Aktivita': 'Studie kontextu', 'Množství': 1, 'Cena za jednotku': 12000, 'Jednotka': 'ks'},
-    
+    {"Fáze": "Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Množství": 1.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Analytická fáze", "Aktivita": "Vymezení řešeného území", "Množství": 1.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Analytická fáze", "Aktivita": "Seznámení se s dostupnými materiály a záměry v území", "Množství": 6.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Analytická fáze", "Aktivita": "Analýza stavu území na základě předem definovaných parametrů a indikátorů", "Množství": 32.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Analytická fáze", "Aktivita": "Kompletace výstupu z analýzy jako podkladu pro zadání soutěže", "Množství": 8.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Analytická fáze", "Aktivita": "Nalezení dohody aktérů (podpis memoranda o shodě na záměru v území)", "Množství": 3.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+
     # Přípravní fáze
-    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Příprava workshopu', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
-    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Koordinace účastníků', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
-    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Příprava materiálů', 'Množství': 1, 'Cena za jednotku': 18000, 'Jednotka': 'ks'},
-    
-    # Průběh soutěžního workshopu
-    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Realizace workshopu', 'Množství': 1, 'Cena za jednotku': 50000, 'Jednotka': 'ks'},
-    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Moderace workshopu', 'Množství': 1, 'Cena za jednotku': 30000, 'Jednotka': 'ks'},
-    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Technická podpora', 'Množství': 1, 'Cena za jednotku': 20000, 'Jednotka': 'ks'},
-    
-    # Vyhlášení výsledků
-    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Vyhodnocení návrhů', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
-    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Příprava závěrečné zprávy', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
-    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Prezentace výsledků', 'Množství': 1, 'Cena za jednotku': 12000, 'Jednotka': 'ks'},
-    
-    # PR podpora
-    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Komunikace s médii', 'Množství': 1, 'Cena za jednotku': 20000, 'Jednotka': 'ks'},
-    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Sociální sítě', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
-    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Tiskové zprávy', 'Množství': 1, 'Cena za jednotku': 10000, 'Jednotka': 'ks'},
-    
-    # Externí dodavatelé
-    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Externí konzultant', 'Množství': 1, 'Cena za jednotku': 35000, 'Jednotka': 'ks'},
-    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Právní služby', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
-    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Technické vybavení', 'Množství': 1, 'Cena za jednotku': 30000, 'Jednotka': 'ks'},
-    
+    {"Fáze": "Přípravní fáze", "Aktivita": "Návrh procesu soutěže (harmonogram, návrh pracovní a konzultační skupiny)", "Množství": 15.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení podrobného rozpočtu", "Množství": 3.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Identifikace hlavních aktérů a návrh jejich zapojení do procesu (včetně moderace diskuzí)", "Množství": 10.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Komunikace s veřejností (návrh procesu, organizace, zpracování výstupů)", "Množství": 0.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Vytvoření značky soutěže (včetně konzultace se zadavatelem)", "Množství": 4.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "PR strategie projektu", "Množství": 4.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Kompletace zadání (parametry využití území, stavební program, průběžná jednání s ŘS a PS)", "Množství": 30.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Formulace soutěžních podmínek", "Množství": 16.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Finalizace a publikace soutěžních podmínek a zadání", "Množství": 4.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení poroty", "Množství": 6.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Přípravní fáze", "Aktivita": "Kompletace před vyhlášením soutěže a ustavující schůze poroty (včetně regulérnosti ČKA)", "Množství": 23.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+
+    # Průběh soutěžního workshopu (SW)
+    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Vyhlášení soutěže – otevřená výzva a výběr soutěžících", "Množství": 7.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 1. SW", "Množství": 30.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 2. SW", "Množství": 30.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 3. SW", "Množství": 30.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+
+    # Vyhlášení výsledků SW
+    {"Fáze": "Vyhlášení výsledků SW", "Aktivita": "Procesní ukončení soutěže", "Množství": 3.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "Vyhlášení výsledků SW", "Aktivita": "Podpora v navazujících fázích projektu", "Množství": 5.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+
+    # PR podpora v průběhu celé soutěže
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Průběžná komunikace projektu (včetně tiskových zpráv)", "Množství": 17.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Průběžná aktualizace webu", "Množství": 3.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Soutěžní katalog (struktura, obsah)", "Množství": 5.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Výstava vítězních návrhů (příprava, struktura, obsah, produkční zajištění, instalace)", "Množství": 5.0, "Cena za jednotku": 14000.0, "Jednotka": "den"},
+
+    # Další náklady - externí dodavatelé
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Produkcční náklady SW (pronájmy sálů pro SW, tisk, občerstvení, technické zajištění)", "Množství": 3.0, "Cena za jednotku": 60000.0, "Jednotka": "SW"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Ubytování zahraničních porotců", "Množství": 9.0, "Cena za jednotku": 5500.0, "Jednotka": "noc"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Cestovné pro zahraniční porotce", "Množství": 18.0, "Cena za jednotku": 7000.0, "Jednotka": "cesta"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Překlady čeština/angličtina", "Množství": 450.0, "Cena za jednotku": 500.0, "Jednotka": "strana textu"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Fotodokumentace celé soutěže (včetně zákresovách fotografií a dokumentace SW)", "Množství": 1.0, "Cena za jednotku": 65000.0, "Jednotka": "soubor"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba vizuálního stylu grafickým studiem", "Množství": 1.0, "Cena za jednotku": 55000.0, "Jednotka": "soubor"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba webu soutěže", "Množství": 1.0, "Cena za jednotku": 95000.0, "Jednotka": "soubor"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafická úprava a sazba soutěžních podmínek a zadání", "Množství": 1.0, "Cena za jednotku": 35000.0, "Jednotka": "soubor"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování katalogu", "Množství": 1.0, "Cena za jednotku": 50000.0, "Jednotka": "soubor"},
+    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování výstavy", "Množství": 1.0, "Cena za jednotku": 70000.0, "Jednotka": "soubor"},
+
     # Odměny
-    {'Fáze': 'Odměny', 'Aktivita': 'Odměna pro vítěze', 'Množství': 1, 'Cena za jednotku': 50000, 'Jednotka': 'ks'},
-    {'Fáze': 'Odměny', 'Aktivita': 'Odměna pro finalisty', 'Množství': 3, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
-    {'Fáze': 'Odměny', 'Aktivita': 'Speciální ocenění', 'Množství': 2, 'Cena za jednotku': 10000, 'Jednotka': 'ks'}
+    {"Fáze": "Odměny", "Aktivita": "Odměny zahraničních porotců", "Množství": 3.0, "Cena za jednotku": 255000.0, "Jednotka": "odměna celková"},
+    {"Fáze": "Odměny", "Aktivita": "Odměny českých porotců", "Množství": 192.0, "Cena za jednotku": 1800.0, "Jednotka": "hod"},
+    {"Fáze": "Odměny", "Aktivita": "Odměny odborníků poroty", "Množství": 192.0, "Cena za jednotku": 1800.0, "Jednotka": "hod"},
+    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - mezinárodní soutěž", "Množství": 5.0, "Cena za jednotku": 1000000.0, "Jednotka": "odměna pro tým"},
+    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - mezinárodní soutěž", "Množství": 3.0, "Cena za jednotku": 1000000.0, "Jednotka": "odměna pro tým"},
+    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - soutěž v češtině", "Množství": 5.0, "Cena za jednotku": 750000.0, "Jednotka": "odměna pro tým"},
+    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - soutěž v češtině", "Množství": 3.0, "Cena za jednotku": 750000.0, "Jednotka": "odměna pro tým"}
 ]
 
 # --- Pomocné funkcie ---
@@ -471,7 +494,7 @@ st.markdown("""
 st.markdown("""
 <div class="main-header">
     <div class="hero-bg"></div>
-    <h1>🏗️ Kalkulátor soutěžního workshopu</h1>
+    <h1>Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů architektonických soutěží</p>
     <div class="brand-logo">4ct platform</div>
 </div>
@@ -691,22 +714,21 @@ if st.button("📊 Export do Excel", type="primary", use_container_width=True):
     )
 
 # PDF Export
-if st.button("📄 Export do PDF", type="primary", use_container_width=True):
-    if len(selected_activities) > 0:
-        try:
-            pdf_buffer = generate_invoice_pdf(selected_activities, total_selected_cost, variant, unit_type)
-            st.download_button(
-                label="📥 Stáhnout PDF faktúru",
-                data=pdf_buffer.getvalue(),
-                file_name=f"faktura_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-            st.success("✅ PDF faktúra byla úspěšně vygenerována!")
-        except Exception as e:
-            st.error(f"❌ Chyba při generování PDF: {str(e)}")
-    else:
-        st.error("❌ Pro export do PDF je potřeba vybrat alespoň jednu aktivitu.")
+if len(selected_activities) > 0:
+    try:
+        pdf_buffer = generate_invoice_pdf(selected_activities, total_selected_cost, variant, unit_type)
+        st.download_button(
+            label="📄 Stáhnout PDF faktúru",
+            data=pdf_buffer.getvalue(),
+            file_name=f"faktura_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+        st.success("✅ PDF faktúra je připravena ke stažení!")
+    except Exception as e:
+        st.error(f"❌ Chyba při generování PDF: {str(e)}")
+else:
+    st.error("❌ Pro export do PDF je potřeba vybrat alespoň jednu aktivitu.")
 
 # Reset
 if st.button("🔄 Reset hodnot", use_container_width=True):
