@@ -299,7 +299,7 @@ def generate_invoice_pdf(selected_activities, total_cost, variant, unit_type):
                                  fontSize=10, 
                                  alignment=TA_CENTER, 
                                  textColor=colors.grey)
-    story.append(Paragraph("Vygenerováno pomocí 4CT Platform Kalkulátoru soutěžního workshopu", footer_style))
+    story.append(Paragraph("4ct platform", footer_style))
     
     doc.build(story)
     buffer.seek(0)
@@ -473,7 +473,7 @@ st.markdown("""
     <div class="hero-bg"></div>
     <h1>🏗️ Kalkulátor soutěžního workshopu</h1>
     <p>Profesionální nástroj pro kalkulaci nákladů architektonických soutěží</p>
-    <div class="brand-logo">4CT Platform</div>
+    <div class="brand-logo">4ct platform</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -495,29 +495,31 @@ with st.sidebar:
         help="Vyberte typ jednotek pro kalkulaci."
     )
 
-# --- Inicializácia dát ---
+# --- Inicializace dat ---
 df = create_activities_dataframe()
 
-# --- Nastavenie stĺpcov podľa variantu ---
-if variant == "SK":
-    variant_suffix = "SK"
-else:
-    variant_suffix = "CZ"
-        
-if unit_type == "Počet jednotek (změna MP)":
-    unit_col = f"Počet MJ (MP) - {variant_suffix}"
-    price_col = f"Cena (MP) - {variant_suffix}"
-else:
-    unit_col = f"Počet MJ (MP+T) - {variant_suffix}"
-    price_col = f"Cena (MP+T) - {variant_suffix}"
-
-# --- Pridanie stĺpcov pre editáciu ---
+# --- Přidání sloupců pro editaci ---
 df['Vybrané'] = True
-df['Upravené množství'] = df[unit_col]
-df['Upravená cena za jednotku'] = df['Cena za jednotku']
+df['Upravené množství'] = df['Množství']  # Použijeme základní množství
+df['Upravená cena za jednotku'] = df['Cena za jednotku']  # Použijeme základní cenu
 df['Poznámky'] = ''
 
-# --- Filtrovanie fáz ---
+# --- Nastavení multiplikátorů podle variantu ---
+if variant == "SK":
+    variant_multiplier = 1.2  # 20% navýšení pro SK
+else:
+    variant_multiplier = 1.0  # Základní cena pro CZ
+    
+if unit_type == "Počet jednotek (změna MP)":
+    unit_multiplier = 1.0  # Základní množství
+else:
+    unit_multiplier = 1.1  # 10% navýšení pro MP+T
+
+# --- Aplikování multiplikátorů ---
+df['Upravené množství'] = df['Množství'] * unit_multiplier
+df['Upravená cena za jednotku'] = df['Cena za jednotku'] * variant_multiplier
+
+# --- Filtrování fází ---
 phases = df['Fáze'].unique()
 selected_phases = st.sidebar.multiselect(
     "Filtrujte fáze:",
@@ -526,16 +528,17 @@ selected_phases = st.sidebar.multiselect(
     help="Vyberte fáze, které chcete zobrazit."
 )
 
-# --- Filtrovanie dát ---
+# --- Filtrování dat ---
 filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
 # --- KPI karty ---
 col1, col2, col3 = st.columns(3)
 with col1:
+    total_cost = (filtered_df['Upravené množství'] * filtered_df['Upravená cena za jednotku']).sum()
     st.markdown(f"""
     <div class="metric-card">
         <h3>Celkové náklady</h3>
-        <h2>{filtered_df[price_col].sum():,.0f} Kč</h2>
+        <h2>{total_cost:,.0f} Kč</h2>
         <p>Celková suma</p>
     </div>
     """, unsafe_allow_html=True)
@@ -548,10 +551,11 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 with col3:
+    avg_cost = (filtered_df['Upravené množství'] * filtered_df['Upravená cena za jednotku']).mean()
     st.markdown(f"""
     <div class="metric-card">
         <h3>Průměrná cena</h3>
-        <h2>{filtered_df[price_col].mean():,.0f} Kč</h2>
+        <h2>{avg_cost:,.0f} Kč</h2>
         <p>Na aktivitu</p>
     </div>
     """, unsafe_allow_html=True)
@@ -561,7 +565,7 @@ st.markdown("""
 <div class="progress-bar"></div>
 """, unsafe_allow_html=True)
 
-# --- Interaktívna tabuľka ---
+# --- Interaktivní tabulka ---
 st.markdown("""
 <div class="phase-header">
     <h3>Interaktivní tabulka aktivit</h3>
@@ -582,12 +586,12 @@ edited_df = st.data_editor(
     }
 )
 
-# --- Výpočet upravených hodnôt ---
+# --- Výpočet upravených hodnot ---
 selected_activities = edited_df[edited_df['Vybrané'] == True].copy()
 selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
 total_selected_cost = selected_activities['Náklady'].sum()
 
-# --- Všetky fázy v pôvodnom poradí ---
+# --- Všechny fáze v původním pořadí ---
 phase_order = [
     'Analytická fáze',
     'Přípravní fáze',
@@ -598,7 +602,7 @@ phase_order = [
     'Odměny'
 ]
 
-# --- Pridaj chýbajúce fázy s nulovými hodnotami ---
+# --- Přidej chybějící fáze s nulovými hodnotami ---
 phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum().reindex(phase_order, fill_value=0)
 
 # --- Optimalizované grafy ---
