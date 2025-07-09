@@ -3,6 +3,15 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 from io import BytesIO
+import base64
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.pdfgen import canvas
+from reportlab.lib.colors import HexColor
 
 # --- Najmodernejší vizuál a UX podľa svetových štandardov ---
 st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
@@ -585,13 +594,152 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
+# --- Funkcia na generovanie PDF ---
+def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
+    
+    # Štýly
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=HexColor('#059669'),
+        alignment=TA_CENTER,
+        spaceAfter=30,
+        fontName='Helvetica-Bold'
+    )
+    heading_style = ParagraphStyle(
+        'CustomHeading',
+        parent=styles['Heading2'],
+        fontSize=16,
+        textColor=HexColor('#10b981'),
+        alignment=TA_LEFT,
+        spaceAfter=12,
+        fontName='Helvetica-Bold'
+    )
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=11,
+        textColor=HexColor('#1e2937'),
+        alignment=TA_LEFT,
+        spaceAfter=6,
+        fontName='Helvetica'
+    )
+    
+    # Obsah dokumentu
+    story = []
+    
+    # Hlavička
+    story.append(Paragraph("Kalkulátor soutěžního workshopu", title_style))
+    story.append(Paragraph(f"Variant: {variant}", normal_style))
+    story.append(Paragraph(f"Typ jednotek: {unit_type}", normal_style))
+    story.append(Paragraph(f"Dátum generovania: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
+    story.append(Spacer(1, 20))
+    
+    # Sumár
+    story.append(Paragraph("Sumár projektu", heading_style))
+    summary_data = [
+        ['Metrika', 'Hodnota'],
+        ['Celkové náklady', f"{total_cost:,.0f} Kč"],
+        ['Počet aktivit', str(len(selected_activities))],
+        ['Průměrná cena na aktivitu', f"{total_cost / len(selected_activities):,.0f} Kč" if len(selected_activities) > 0 else "0 Kč"]
+    ]
+    summary_table = Table(summary_data, colWidths=[2*inch, 3*inch])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#059669')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), HexColor('#f8fafc')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+    ]))
+    story.append(summary_table)
+    story.append(Spacer(1, 20))
+    
+    # Detailné rozpísanie podľa fáz
+    if len(selected_activities) > 0:
+        story.append(Paragraph("Detailné rozpísanie aktivit", heading_style))
+        
+        # Zoskupenie podľa fáz
+        phase_groups = selected_activities.groupby('Fáze')
+        
+        for phase, phase_activities in phase_groups:
+            story.append(Paragraph(f"Fáze: {phase}", heading_style))
+            
+            # Tabuľka aktivít pre fázu
+            table_data = [['Aktivita', 'Množství', 'Cena za jednotku', 'Náklady', 'Poznámky']]
+            
+            for _, activity in phase_activities.iterrows():
+                table_data.append([
+                    activity['Aktivita'],
+                    f"{activity['Upravené množství']:.1f}",
+                    f"{activity['Upravená cena za jednotku']:,.0f} Kč",
+                    f"{activity['Náklady']:,.0f} Kč",
+                    activity['Poznámky'] if pd.notna(activity['Poznámky']) else ''
+                ])
+            
+            # Pridanie súčtu fázy
+            phase_total = phase_activities['Náklady'].sum()
+            table_data.append(['', '', 'SÚČET FÁZY:', f"{phase_total:,.0f} Kč", ''])
+            
+            activity_table = Table(table_data, colWidths=[2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
+            activity_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -2), HexColor('#ffffff')),
+                ('BACKGROUND', (0, -1), (-1, -1), HexColor('#f3f4f6')),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, -1), (-1, -1), 10),
+            ]))
+            story.append(activity_table)
+            story.append(Spacer(1, 15))
+    
+    # Graf (ak je dostupný)
+    if len(selected_activities) > 0:
+        story.append(Paragraph("Vizualizace nákladů", heading_style))
+        story.append(Paragraph("Graf hierarchického rozložení nákladů je dostupný v interaktívnej verzii aplikácie.", normal_style))
+        story.append(Spacer(1, 20))
+    
+    # Záver
+    story.append(Paragraph("Záver", heading_style))
+    story.append(Paragraph(f"Celkové náklady na soutěžní workshop činí {total_cost:,.0f} Kč.", normal_style))
+    story.append(Paragraph("Tento dokument bol automaticky vygenerovaný kalkulátorom soutěžního workshopu.", normal_style))
+    
+    # Vytvorenie PDF
+    doc.build(story)
+    buffer.seek(0)
+    return buffer
+
 # --- Export ---
 st.markdown("""
 <div class="phase-header">
     <h3>Export dat</h3>
 </div>
 """, unsafe_allow_html=True)
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("Export do Excel", type="primary"):
         output = BytesIO()
@@ -619,6 +767,18 @@ with col1:
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 with col2:
+    if st.button("Export do PDF", type="primary"):
+        if len(selected_activities) > 0:
+            pdf_buffer = generate_pdf_report(selected_activities, total_selected_cost, variant, unit_type)
+            st.download_button(
+                label="Stáhnout PDF report",
+                data=pdf_buffer.getvalue(),
+                file_name=f"kalkulace_soutezniho_workshopu_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                mime="application/pdf"
+            )
+        else:
+            st.warning("Pro generování PDF reportu vyberte alespoň jednu aktivitu.")
+with col3:
     if st.button("Reset hodnot"):
         st.rerun()
 
