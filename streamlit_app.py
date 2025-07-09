@@ -1,44 +1,189 @@
+# =============================================================================
+# KALKULÁTOR SOUTĚŽNÍHO WORKSHOPU - OPTIMALIZOVANÁ VERZIA
+# =============================================================================
+
+# --- Importy ---
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime
 from io import BytesIO
-import base64
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
+
+# --- Konštanty ---
+PHASES = [
+    'Analytická fáze',
+    'Přípravní fáze', 
+    'Průběh soutěžního workshopu (SW)',
+    'Vyhlášení výsledků SW',
+    'PR podpora v průběhu celé soutěže',
+    'Další náklady - externí dodavatelé',
+    'Odměny'
+]
+
+PHASE_COLORS = {
+    'Analytická fáze': '#059669',
+    'Přípravní fáze': '#10b981',
+    'Průběh soutěžního workshopu (SW)': '#dc2626',
+    'Vyhlášení výsledků SW': '#7c3aed',
+    'PR podpora v průběhu celé soutěže': '#ea580c',
+    'Další náklady - externí dodavatelé': '#0891b2',
+    'Odměny': '#be185d'
+}
+
+# --- Konfigurácia aplikácie ---
+PAGE_CONFIG = {
+    'page_title': "Kalkulátor soutěžního workshopu",
+    'page_icon': "🏗️",
+    'layout': "wide"
+}
+
+# --- Dáta aktivít ---
+ACTIVITIES_DATA = [
+    # Analytická fáze
+    {'Fáze': 'Analytická fáze', 'Aktivita': 'Analýza zadání soutěže', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
+    {'Fáze': 'Analytická fáze', 'Aktivita': 'Průzkum lokality', 'Množství': 1, 'Cena za jednotku': 8000, 'Jednotka': 'ks'},
+    {'Fáze': 'Analytická fáze', 'Aktivita': 'Studie kontextu', 'Množství': 1, 'Cena za jednotku': 12000, 'Jednotka': 'ks'},
+    
+    # Přípravní fáze
+    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Příprava workshopu', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
+    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Koordinace účastníků', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
+    {'Fáze': 'Přípravní fáze', 'Aktivita': 'Příprava materiálů', 'Množství': 1, 'Cena za jednotku': 18000, 'Jednotka': 'ks'},
+    
+    # Průběh soutěžního workshopu
+    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Realizace workshopu', 'Množství': 1, 'Cena za jednotku': 50000, 'Jednotka': 'ks'},
+    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Moderace workshopu', 'Množství': 1, 'Cena za jednotku': 30000, 'Jednotka': 'ks'},
+    {'Fáze': 'Průběh soutěžního workshopu (SW)', 'Aktivita': 'Technická podpora', 'Množství': 1, 'Cena za jednotku': 20000, 'Jednotka': 'ks'},
+    
+    # Vyhlášení výsledků
+    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Vyhodnocení návrhů', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
+    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Příprava závěrečné zprávy', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
+    {'Fáze': 'Vyhlášení výsledků SW', 'Aktivita': 'Prezentace výsledků', 'Množství': 1, 'Cena za jednotku': 12000, 'Jednotka': 'ks'},
+    
+    # PR podpora
+    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Komunikace s médii', 'Množství': 1, 'Cena za jednotku': 20000, 'Jednotka': 'ks'},
+    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Sociální sítě', 'Množství': 1, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
+    {'Fáze': 'PR podpora v průběhu celé soutěže', 'Aktivita': 'Tiskové zprávy', 'Množství': 1, 'Cena za jednotku': 10000, 'Jednotka': 'ks'},
+    
+    # Externí dodavatelé
+    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Externí konzultant', 'Množství': 1, 'Cena za jednotku': 35000, 'Jednotka': 'ks'},
+    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Právní služby', 'Množství': 1, 'Cena za jednotku': 25000, 'Jednotka': 'ks'},
+    {'Fáze': 'Další náklady - externí dodavatelé', 'Aktivita': 'Technické vybavení', 'Množství': 1, 'Cena za jednotku': 30000, 'Jednotka': 'ks'},
+    
+    # Odměny
+    {'Fáze': 'Odměny', 'Aktivita': 'Odměna pro vítěze', 'Množství': 1, 'Cena za jednotku': 50000, 'Jednotka': 'ks'},
+    {'Fáze': 'Odměny', 'Aktivita': 'Odměna pro finalisty', 'Množství': 3, 'Cena za jednotku': 15000, 'Jednotka': 'ks'},
+    {'Fáze': 'Odměny', 'Aktivita': 'Speciální ocenění', 'Množství': 2, 'Cena za jednotku': 10000, 'Jednotka': 'ks'}
+]
+
+# --- Pomocné funkcie ---
+def create_activities_dataframe():
+    """Vytvorí DataFrame s aktivitami z konštánt"""
+    return pd.DataFrame(ACTIVITIES_DATA)
+
+def calculate_costs(df, variant_multiplier, unit_type_multiplier):
+    """Vypočíta náklady na základe multiplikátorov"""
+    df = df.copy()
+    df['Upravené množství'] = df['Množství'] * variant_multiplier
+    df['Upravená cena za jednotku'] = df['Cena za jednotku'] * unit_type_multiplier
+    df['Náklady'] = df['Upravené množství'] * df['Upravená cena za jednotku']
+    return df
+
+def get_phase_summary(df):
+    """Vráti súhrn nákladov podľa fáz"""
+    phase_costs = df.groupby('Fáze')['Náklady'].sum().reindex(PHASES, fill_value=0)
+    return phase_costs
+
+def create_sunburst_chart(df):
+    """Vytvorí sunburst graf s hierarchiou fázy -> aktivity"""
+    if df.empty:
+        return go.Figure()
+    
+    # Vytvoríme hierarchiu fázy -> aktivity
+    fig_data = []
+    for _, row in df.iterrows():
+        fig_data.append({
+            'ids': [f"{row['Fáze']}", f"{row['Fáze']}-{row['Aktivita']}"],
+            'labels': [row['Fáze'], row['Aktivita']],
+            'parents': ['', row['Fáze']],
+            'values': [row['Náklady'], row['Náklady']],
+            'customdata': [[row['Fáze'], f"{row['Náklady']:,.0f} Kč"], 
+                          [row['Aktivita'], f"{row['Náklady']:,.0f} Kč"]]
+        })
+    
+    # Zoskupíme dáta
+    all_ids = []
+    all_labels = []
+    all_parents = []
+    all_values = []
+    all_customdata = []
+    
+    for data in fig_data:
+        all_ids.extend(data['ids'])
+        all_labels.extend(data['labels'])
+        all_parents.extend(data['parents'])
+        all_values.extend(data['values'])
+        all_customdata.extend(data['customdata'])
+    
+    fig = go.Figure(go.Sunburst(
+        ids=all_ids,
+        labels=all_labels,
+        parents=all_parents,
+        values=all_values,
+        customdata=all_customdata,
+        hovertemplate='<b>%{label}</b><br>Náklady: %{customdata[1]}<extra></extra>',
+        branchvalues='total',
+        marker=dict(colors=[PHASE_COLORS.get(label, '#6b7280') for label in all_labels]),
+        textinfo='label+value'
+    ))
+    
+    fig.update_layout(
+        title={
+            'text': 'Rozložení nákladů podle fází a aktivit',
+            'x': 0.5,
+            'xanchor': 'center',
+            'font': {'size': 20, 'color': '#059669'}
+        },
+        width=800,
+        height=600,
+        margin=dict(t=80, l=20, r=20, b=20),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    return fig
 
 # --- Funkcia na generovanie PDF faktúry ---
 def generate_invoice_pdf(selected_activities, total_cost, variant, unit_type):
+    """Generuje PDF faktúru s detailným rozpisom"""
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     story = []
+    styles = getSampleStyleSheet()
     
     # Štýly
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=24,
-        spaceAfter=30,
-        alignment=TA_CENTER,
-        textColor=colors.HexColor('#059669')
-    )
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=16,
-        spaceAfter=12,
-        textColor=colors.HexColor('#059669')
-    )
-    normal_style = styles['Normal']
+    title_style = ParagraphStyle('CustomTitle', 
+                                parent=styles['Heading1'], 
+                                fontSize=24, 
+                                spaceAfter=30, 
+                                alignment=TA_CENTER, 
+                                textColor=colors.HexColor('#059669'))
     
-    # Hlavička faktúry
+    heading_style = ParagraphStyle('CustomHeading', 
+                                  parent=styles['Heading2'], 
+                                  fontSize=16, 
+                                  spaceAfter=12, 
+                                  textColor=colors.HexColor('#059669'))
+    
+    # Hlavička
     story.append(Paragraph("KALKULACE SOUTĚŽNÍHO WORKSHOPU", title_style))
     story.append(Spacer(1, 20))
     
@@ -64,52 +209,49 @@ def generate_invoice_pdf(selected_activities, total_cost, variant, unit_type):
     story.append(project_table)
     story.append(Spacer(1, 30))
     
-    # Graf nákladov podľa fáz
+    # Graf podľa fáz
     if len(selected_activities) > 0:
-        story.append(Paragraph("ROZLOŽENIE NÁKLADŮ PODLE FÁZ", heading_style))
+        story.append(Paragraph("ROZLOŽENÍ NÁKLADŮ PODLE FÁZ", heading_style))
         story.append(Spacer(1, 15))
         
-        # Vytvorenie grafu
-        plt.figure(figsize=(10, 6))
-        phase_costs = selected_activities.groupby('Fáze')['Náklady'].sum()
-        colors_list = ['#059669', '#10b981', '#dc2626', '#7c3aed', '#ea580c', '#0891b2', '#be185d']
-        
-        plt.pie(phase_costs.values, labels=phase_costs.index, autopct='%1.1f%%', 
-                colors=colors_list[:len(phase_costs)], startangle=90)
-        plt.title('Rozložení nákladů podle fáz', fontsize=16, fontweight='bold', color='#059669')
+        plt.figure(figsize=(8, 4))
+        phase_costs = get_phase_summary(selected_activities)
+        plt.pie(phase_costs.values, 
+                labels=phase_costs.index, 
+                autopct='%1.1f%%', 
+                colors=[PHASE_COLORS[p] for p in PHASES], 
+                startangle=90)
+        plt.title('Rozložení nákladů podle fází', 
+                 fontsize=16, 
+                 fontweight='bold', 
+                 color='#059669')
         plt.axis('equal')
         
-        # Uloženie grafu do buffer
         img_buffer = BytesIO()
         plt.savefig(img_buffer, format='png', dpi=300, bbox_inches='tight')
         img_buffer.seek(0)
         plt.close()
         
-        # Pridanie grafu do PDF
         img = Image(img_buffer)
-        img.drawHeight = 4*inch
-        img.drawWidth = 6*inch
+        img.drawHeight = 3*inch
+        img.drawWidth = 5*inch
         story.append(img)
         story.append(Spacer(1, 20))
     
-    # Detailný zoznam aktivít
+    # Detailný rozpis
     story.append(Paragraph("DETAILNÍ ROZPIS AKTIVIT", heading_style))
     story.append(Spacer(1, 15))
     
-    # Hlavička tabuľky
     table_data = [['Fáze', 'Aktivita', 'Množství', 'Cena za jednotku', 'Celková cena']]
-    
-    # Dáta aktivít
     for _, row in selected_activities.iterrows():
         table_data.append([
-            row['Fáze'],
-            row['Aktivita'],
-            f"{row['Upravené množství']:.1f}",
-            f"{row['Upravená cena za jednotku']:,.0f} Kč",
+            row['Fáze'], 
+            row['Aktivita'], 
+            f"{row['Upravené množství']:.1f}", 
+            f"{row['Upravená cena za jednotku']:,.0f} Kč", 
             f"{row['Náklady']:,.0f} Kč"
         ])
     
-    # Vytvorenie tabuľky
     table = Table(table_data, colWidths=[1.5*inch, 2.5*inch, 1*inch, 1.5*inch, 1.5*inch])
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
@@ -131,10 +273,11 @@ def generate_invoice_pdf(selected_activities, total_cost, variant, unit_type):
     story.append(Paragraph("SOUHRN", heading_style))
     story.append(Spacer(1, 15))
     
+    avg_cost = total_cost/len(selected_activities) if len(selected_activities) > 0 else 0
     summary_data = [
         ['Celkové náklady:', f"{total_cost:,.0f} Kč"],
         ['Počet aktivit:', str(len(selected_activities))],
-        ['Průměrná cena na aktivitu:', f"{total_cost/len(selected_activities):,.0f} Kč" if len(selected_activities) > 0 else "0 Kč"]
+        ['Průměrná cena na aktivitu:', f"{avg_cost:,.0f} Kč"]
     ]
     
     summary_table = Table(summary_data, colWidths=[3*inch, 2*inch])
@@ -151,23 +294,21 @@ def generate_invoice_pdf(selected_activities, total_cost, variant, unit_type):
     
     # Pätička
     story.append(Spacer(1, 40))
-    footer_style = ParagraphStyle(
-        'Footer',
-        parent=styles['Normal'],
-        fontSize=10,
-        alignment=TA_CENTER,
-        textColor=colors.grey
-    )
+    footer_style = ParagraphStyle('Footer', 
+                                 parent=styles['Normal'], 
+                                 fontSize=10, 
+                                 alignment=TA_CENTER, 
+                                 textColor=colors.grey)
     story.append(Paragraph("Vygenerováno pomocí 4CT Platform Kalkulátoru soutěžního workshopu", footer_style))
     
-    # Vytvorenie PDF
     doc.build(story)
     buffer.seek(0)
     return buffer
 
-# --- Najmodernejší vizuál a UX podľa svetových štandardov ---
-st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
+# --- Streamlit UI ---
+st.set_page_config(**PAGE_CONFIG)
 
+# --- CSS Štýly ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
@@ -232,387 +373,151 @@ st.markdown("""
         font-size: 1.1rem !important;
     }
     .metric-card {
-        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
-        padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
         border-radius: 1.5rem;
-        color: #1e2937;
-        text-align: center;
+        padding: 2rem;
         margin: 1rem 0;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
-        position: relative;
-        overflow: hidden;
-        transition: box-shadow 0.2s, transform 0.2s;
+        box-shadow: 0 8px 32px rgba(5,150,105,0.08);
+        border: 1px solid rgba(5,150,105,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
     }
     .metric-card:hover {
-        box-shadow: 0 8px 32px rgba(5,150,105,0.16);
-        transform: translateY(-2px) scale(1.01);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 48px rgba(5,150,105,0.12);
     }
     .metric-card h3 {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #10b981;
-        margin-bottom: 0.2rem;
+        color: #059669;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
     .metric-card h2 {
-        font-size: 2.2rem;
+        color: #1e293b;
+        font-size: 2.5rem;
         font-weight: 900;
-        color: #059669;
-        margin: 0.2rem 0 0.1rem 0;
-        letter-spacing: -0.02em;
+        margin-bottom: 0.5rem;
+        line-height: 1;
     }
     .metric-card p {
-        font-size: 1rem;
-        opacity: 0.7;
+        color: #64748b;
+        font-size: 0.9rem;
         margin: 0;
     }
     .phase-header {
         background: linear-gradient(120deg, #059669 0%, #10b981 100%);
         padding: 1.5rem 2rem;
-        border-radius: 1.2rem;
+        border-radius: 1rem;
         color: white;
-        margin: 2rem 0 1.2rem 0;
+        margin: 2rem 0 1rem 0;
+        text-align: center;
         font-weight: 700;
         font-size: 1.3rem;
-        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
-        border-left: 8px solid #34d399;
-        position: relative;
-    }
-    .chart-container {
-        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
-        border-radius: 1.5rem;
-        padding: 2.5rem 2rem 2rem 2rem;
-        margin: 2rem 0;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
-        position: relative;
-    }
-    .stButton > button {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
-        color: white;
-        border: none;
-        border-radius: 1rem;
-        padding: 1rem 2.5rem;
-        font-weight: 700;
-        font-size: 1.1rem;
-        transition: all 0.2s;
-        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
-        text-transform: none;
-        letter-spacing: 0.02em;
-    }
-    .stButton > button:hover {
-        transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 8px 32px rgba(5,150,105,0.18);
-        background: linear-gradient(120deg, #047857 0%, #34d399 100%);
+        box-shadow: 0 8px 32px rgba(5,150,105,0.15);
     }
     .progress-bar {
-        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
-        height: 8px;
-        border-radius: 4px;
-        margin: 2rem 0 1.5rem 0;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(5,150,105,0.10);
-    }
-    .progress-bar::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        animation: shimmer 2s infinite;
+        height: 4px;
+        background: linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%);
+        border-radius: 2px;
+        margin: 2rem 0;
+        animation: shimmer 2s ease-in-out infinite;
     }
     @keyframes shimmer {
-        0% { left: -100%; }
-        100% { left: 100%; }
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+    .chart-container {
+        background: rgba(255,255,255,0.95);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: 0 8px 32px rgba(5,150,105,0.08);
+        border: 1px solid rgba(5,150,105,0.1);
     }
     .sticky-summary {
         position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100vw;
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        bottom: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         color: white;
-        text-align: center;
-        padding: 1.2rem 0.5rem 1rem 0.5rem;
-        z-index: 9999;
-        font-weight: 700;
-        font-size: 1.25rem;
-        box-shadow: 0 -4px 24px rgba(5,150,105,0.12);
-        border-top-left-radius: 1.5rem;
-        border-top-right-radius: 1.5rem;
-        letter-spacing: 0.02em;
+        padding: 1.5rem 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 12px 48px rgba(5,150,105,0.25);
+        z-index: 1000;
+        min-width: 300px;
         backdrop-filter: blur(10px);
     }
-    .dataframe {
-        border-radius: 1.2rem;
-        overflow: hidden;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
-    }
-    .dataframe th {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
-        color: white;
-        font-weight: 700;
-        padding: 1rem;
+    .sticky-summary h4 {
+        margin: 0 0 0.5rem 0;
         font-size: 1.1rem;
+        font-weight: 700;
     }
-    .dataframe td {
-        padding: 0.85rem;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 1.05rem;
+    .sticky-summary .total-cost {
+        font-size: 2rem;
+        font-weight: 900;
+        margin: 0.5rem 0;
     }
-    .stCheckbox > label, .stRadio > label {
-        font-weight: 600;
-        color: #1e2937;
-    }
-    @media (max-width: 900px) {
-        .main-header h1 { font-size: 2.1rem; }
-        .main-header p { font-size: 1rem; }
-        .metric-card { padding: 1.2rem; }
-        .chart-container { padding: 1.2rem; }
+    .sticky-summary .activity-count {
+        font-size: 1rem;
+        opacity: 0.9;
     }
 </style>
 """, unsafe_allow_html=True)
 
+# --- Hlavička aplikácie ---
 st.markdown("""
 <div class="main-header">
     <div class="hero-bg"></div>
-    <h1>Kalkulátor soutěžního workshopu</h1>
-    <p>Profesionální nástroj pro kalkulaci nákladů na architektonické soutěže</p>
+    <h1>🏗️ Kalkulátor soutěžního workshopu</h1>
+    <p>Profesionální nástroj pro kalkulaci nákladů architektonických soutěží</p>
     <div class="brand-logo">4CT Platform</div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- Sidebar ---
-st.sidebar.markdown("""
-<div class="sidebar-header">
-    <span style="font-size:1.5rem;vertical-align:middle;">⚙️</span> Nastavení projektu
-</div>
-""", unsafe_allow_html=True)
+with st.sidebar:
+    st.markdown('<div class="sidebar-header">⚙️ Nastavení</div>', unsafe_allow_html=True)
+    
+    # Variant
+    variant = st.radio(
+        "Vyberte variant:",
+        ["CZ", "SK"],
+        help="Vyberte variant pro kalkulaci."
+    )
+    
+    # Typ jednotiek
+    unit_type = st.radio(
+        "Typ jednotek:",
+        ["Počet jednotek (změna MP)", "Počet jednotek (MP+T)"],
+        help="Vyberte typ jednotek pro kalkulaci."
+    )
 
-variant = st.sidebar.radio(
-    "Vyberte variantu:",
-    ["Mezinárodní soutěžní workshop", "Soutěžní workshop v češtině"],
-    help="Vyberte typ soutěže."
-)
-unit_type = st.sidebar.radio(
-    "Vyberte typ jednotek:",
-    ["Počet jednotek (změna MP)", "Počet jednotek (změna MP + transformační plochy)"],
-    help="Vyberte, zda chcete počítat pouze MP nebo i transformační plochy."
-)
+# --- Inicializácia dát ---
+df = create_activities_dataframe()
 
-# --- Dáta ---
-activities_data = [
-    # Analytická fáze
-    {"Fáze": "Analytická fáze", "Aktivita": "Sestavení řídící skupiny", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 2.0, "Cena (MP) - EN": 14000, "Cena (MP+T) - EN": 28000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 2.0, "Cena (MP) - CZ": 14000, "Cena (MP+T) - CZ": 28000},
-    
-    {"Fáze": "Analytická fáze", "Aktivita": "Vymezení řešeného území", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 2.0, "Cena (MP) - EN": 14000, "Cena (MP+T) - EN": 28000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 2.0, "Cena (MP) - CZ": 14000, "Cena (MP+T) - CZ": 28000},
-    
-    {"Fáze": "Analytická fáze", "Aktivita": "Seznámení se s dostupnými materiály a záměry v území", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 6.0, "Počet MJ (MP+T) - EN": 8.0, "Cena (MP) - EN": 84000, "Cena (MP+T) - EN": 112000,
-     "Počet MJ (MP) - CZ": 6.0, "Počet MJ (MP+T) - CZ": 8.0, "Cena (MP) - CZ": 84000, "Cena (MP+T) - CZ": 112000},
-    
-    {"Fáze": "Analytická fáze", "Aktivita": "Analýza stavu území na základě předem definovaných parametrů a indikátorů", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 32.0, "Počet MJ (MP+T) - EN": 42.0, "Cena (MP) - EN": 448000, "Cena (MP+T) - EN": 588000,
-     "Počet MJ (MP) - CZ": 32.0, "Počet MJ (MP+T) - CZ": 42.0, "Cena (MP) - CZ": 448000, "Cena (MP+T) - CZ": 588000},
-    
-    {"Fáze": "Analytická fáze", "Aktivita": "Kompletace výstupu z analýzy jako podkladu pro zadání soutěže", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 8.0, "Počet MJ (MP+T) - EN": 11.0, "Cena (MP) - EN": 112000, "Cena (MP+T) - EN": 154000,
-     "Počet MJ (MP) - CZ": 8.0, "Počet MJ (MP+T) - CZ": 11.0, "Cena (MP) - CZ": 112000, "Cena (MP+T) - CZ": 154000},
-    
-    {"Fáze": "Analytická fáze", "Aktivita": "Nalezení dohody aktérů (podpis memoranda o shodě na záměru v území)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 6.0, "Cena (MP) - EN": 42000, "Cena (MP+T) - EN": 84000,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 6.0, "Cena (MP) - CZ": 42000, "Cena (MP+T) - CZ": 84000},
-
-    # Přípravní fáze
-    {"Fáze": "Přípravní fáze", "Aktivita": "Návrh procesu soutěže (harmonogram, návrh pracovní a konzultační skupiny)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 15.0, "Počet MJ (MP+T) - EN": 20.0, "Cena (MP) - EN": 210000, "Cena (MP+T) - EN": 280000,
-     "Počet MJ (MP) - CZ": 15.0, "Počet MJ (MP+T) - CZ": 20.0, "Cena (MP) - CZ": 210000, "Cena (MP+T) - CZ": 280000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení podrobného rozpočtu", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 4.0, "Cena (MP) - EN": 42000, "Cena (MP+T) - EN": 56000,
-     "Počet MJ (MP) - CZ": 2.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 28000, "Cena (MP+T) - CZ": 42000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Identifikace hlavních aktérů a návrh jejich zapojení do procesu (včetně moderace diskuzí)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 10.0, "Počet MJ (MP+T) - EN": 15.0, "Cena (MP) - EN": 140000, "Cena (MP+T) - EN": 210000,
-     "Počet MJ (MP) - CZ": 10.0, "Počet MJ (MP+T) - CZ": 15.0, "Cena (MP) - CZ": 140000, "Cena (MP+T) - CZ": 210000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Komunikace s veřejností (návrh procesu, organizace, zpracování výstupů)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 0.0, "Počet MJ (MP+T) - EN": 15.0, "Cena (MP) - EN": 0, "Cena (MP+T) - EN": 210000,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 15.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 210000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Vytvoření značky soutěže (včetně konzultace se zadavatelem)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 4.0, "Počet MJ (MP+T) - EN": 4.0, "Cena (MP) - EN": 56000, "Cena (MP+T) - EN": 56000,
-     "Počet MJ (MP) - CZ": 4.0, "Počet MJ (MP+T) - CZ": 4.0, "Cena (MP) - CZ": 56000, "Cena (MP+T) - CZ": 56000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "PR strategie projektu", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 4.0, "Počet MJ (MP+T) - EN": 4.0, "Cena (MP) - EN": 56000, "Cena (MP+T) - EN": 56000,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 42000, "Cena (MP+T) - CZ": 42000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Kompletace zadání (parametry využití území, stavební program, průběžná jednání s ŘS a PS)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 30.0, "Počet MJ (MP+T) - EN": 50.0, "Cena (MP) - EN": 420000, "Cena (MP+T) - EN": 700000,
-     "Počet MJ (MP) - CZ": 25.0, "Počet MJ (MP+T) - CZ": 40.0, "Cena (MP) - CZ": 350000, "Cena (MP+T) - CZ": 560000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Formulace soutěžních podmínek", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 16.0, "Počet MJ (MP+T) - EN": 20.0, "Cena (MP) - EN": 224000, "Cena (MP+T) - EN": 280000,
-     "Počet MJ (MP) - CZ": 16.0, "Počet MJ (MP+T) - CZ": 20.0, "Cena (MP) - CZ": 224000, "Cena (MP+T) - CZ": 280000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Finalizace a publikace soutěžních podmínek a zadání", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 4.0, "Počet MJ (MP+T) - EN": 5.0, "Cena (MP) - EN": 56000, "Cena (MP+T) - EN": 70000,
-     "Počet MJ (MP) - CZ": 4.0, "Počet MJ (MP+T) - CZ": 5.0, "Cena (MP) - CZ": 56000, "Cena (MP+T) - CZ": 70000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Sestavení poroty", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 6.0, "Počet MJ (MP+T) - EN": 9.0, "Cena (MP) - EN": 84000, "Cena (MP+T) - EN": 126000,
-     "Počet MJ (MP) - CZ": 5.0, "Počet MJ (MP+T) - CZ": 8.0, "Cena (MP) - CZ": 70000, "Cena (MP+T) - CZ": 112000},
-    
-    {"Fáze": "Přípravní fáze", "Aktivita": "Kompletace před vyhlášením soutěže a ustavující schůze poroty (včetně regulérnosti ČKA)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 23.0, "Počet MJ (MP+T) - EN": 25.0, "Cena (MP) - EN": 322000, "Cena (MP+T) - EN": 350000,
-     "Počet MJ (MP) - CZ": 23.0, "Počet MJ (MP+T) - CZ": 25.0, "Cena (MP) - CZ": 322000, "Cena (MP+T) - CZ": 350000},
-
-    # Průběh soutěžního workshopu (SW)
-    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Vyhlášení soutěže – otevřená výzva a výběr soutěžících", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 7.0, "Počet MJ (MP+T) - EN": 7.0, "Cena (MP) - EN": 98000, "Cena (MP+T) - EN": 98000,
-     "Počet MJ (MP) - CZ": 5.0, "Počet MJ (MP+T) - CZ": 5.0, "Cena (MP) - CZ": 70000, "Cena (MP+T) - CZ": 70000},
-    
-    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 1. SW", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 30.0, "Počet MJ (MP+T) - EN": 30.0, "Cena (MP) - EN": 420000, "Cena (MP+T) - EN": 420000,
-     "Počet MJ (MP) - CZ": 25.0, "Počet MJ (MP+T) - CZ": 25.0, "Cena (MP) - CZ": 350000, "Cena (MP+T) - CZ": 350000},
-    
-    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 2. SW", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 30.0, "Počet MJ (MP+T) - EN": 30.0, "Cena (MP) - EN": 420000, "Cena (MP+T) - EN": 420000,
-     "Počet MJ (MP) - CZ": 25.0, "Počet MJ (MP+T) - CZ": 25.0, "Cena (MP) - CZ": 350000, "Cena (MP+T) - CZ": 350000},
-    
-    {"Fáze": "Průběh soutěžního workshopu (SW)", "Aktivita": "Příprava a organizace 3. SW", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 30.0, "Počet MJ (MP+T) - EN": 30.0, "Cena (MP) - EN": 420000, "Cena (MP+T) - EN": 420000,
-     "Počet MJ (MP) - CZ": 25.0, "Počet MJ (MP+T) - CZ": 25.0, "Cena (MP) - CZ": 350000, "Cena (MP+T) - CZ": 350000},
-
-    # Vyhlášení výsledků SW
-    {"Fáze": "Vyhlášení výsledků SW", "Aktivita": "Procesní ukončení soutěže", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 3.0, "Cena (MP) - EN": 42000, "Cena (MP+T) - EN": 42000,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 42000, "Cena (MP+T) - CZ": 42000},
-    
-    {"Fáze": "Vyhlášení výsledků SW", "Aktivita": "Podpora v navazujících fázích projektu", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 5.0, "Počet MJ (MP+T) - EN": 10.0, "Cena (MP) - EN": 70000, "Cena (MP+T) - EN": 140000,
-     "Počet MJ (MP) - CZ": 5.0, "Počet MJ (MP+T) - CZ": 10.0, "Cena (MP) - CZ": 70000, "Cena (MP+T) - CZ": 140000},
-
-    # PR podpora v průběhu celé soutěže
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Průběžná komunikace projektu (včetně tiskových zpráv)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 17.0, "Počet MJ (MP+T) - EN": 17.0, "Cena (MP) - EN": 238000, "Cena (MP+T) - EN": 238000,
-     "Počet MJ (MP) - CZ": 13.0, "Počet MJ (MP+T) - CZ": 13.0, "Cena (MP) - CZ": 182000, "Cena (MP+T) - CZ": 182000},
-    
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Průběžná aktualizace webu", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 3.0, "Cena (MP) - EN": 42000, "Cena (MP+T) - EN": 42000,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 42000, "Cena (MP+T) - CZ": 42000},
-    
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Soutěžní katalog (struktura, obsah)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 5.0, "Počet MJ (MP+T) - EN": 5.0, "Cena (MP) - EN": 70000, "Cena (MP+T) - EN": 70000,
-     "Počet MJ (MP) - CZ": 4.0, "Počet MJ (MP+T) - CZ": 4.0, "Cena (MP) - CZ": 56000, "Cena (MP+T) - CZ": 56000},
-    
-    {"Fáze": "PR podpora v průběhu celé soutěže", "Aktivita": "Výstava vítězních návrhů (příprava, struktura, obsah, produkční zajištění, instalace)", "Jednotka": "den", "Cena za jednotku": 14000.0,
-     "Počet MJ (MP) - EN": 5.0, "Počet MJ (MP+T) - EN": 5.0, "Cena (MP) - EN": 70000, "Cena (MP+T) - EN": 70000,
-     "Počet MJ (MP) - CZ": 5.0, "Počet MJ (MP+T) - CZ": 5.0, "Cena (MP) - CZ": 70000, "Cena (MP+T) - CZ": 70000},
-
-    # Další náklady - externí dodavatelé
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Produkcční náklady SW (pronájmy sálů pro SW, tisk, občerstvení, technické zajištění)", "Jednotka": "SW", "Cena za jednotku": 60000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 3.0, "Cena (MP) - EN": 180000, "Cena (MP+T) - EN": 180000,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 180000, "Cena (MP+T) - CZ": 180000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Ubytování zahraničních porotců", "Jednotka": "noc", "Cena za jednotku": 5500.0,
-     "Počet MJ (MP) - EN": 9.0, "Počet MJ (MP+T) - EN": 9.0, "Cena (MP) - EN": 49500, "Cena (MP+T) - EN": 49500,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 0.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 0},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Cestovné pro zahraniční porotce", "Jednotka": "cesta", "Cena za jednotku": 7000.0,
-     "Počet MJ (MP) - EN": 18.0, "Počet MJ (MP+T) - EN": 18.0, "Cena (MP) - EN": 126000, "Cena (MP+T) - EN": 126000,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 0.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 0},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Překlady čeština/angličtina", "Jednotka": "strana textu", "Cena za jednotku": 500.0,
-     "Počet MJ (MP) - EN": 450.0, "Počet MJ (MP+T) - EN": 700.0, "Cena (MP) - EN": 225000, "Cena (MP+T) - EN": 350000,
-     "Počet MJ (MP) - CZ": 10.0, "Počet MJ (MP+T) - CZ": 10.0, "Cena (MP) - CZ": 5000, "Cena (MP+T) - CZ": 5000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Fotodokumentace celé soutěže (včetně zákresovách fotografií a dokumentace SW)", "Jednotka": "soubor", "Cena za jednotku": 65000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 65000, "Cena (MP+T) - EN": 65000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 65000, "Cena (MP+T) - CZ": 65000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba vizuálního stylu grafickým studiem", "Jednotka": "soubor", "Cena za jednotku": 55000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 55000, "Cena (MP+T) - EN": 55000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 55000, "Cena (MP+T) - CZ": 55000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Tvorba webu soutěže", "Jednotka": "soubor", "Cena za jednotku": 95000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 95000, "Cena (MP+T) - EN": 95000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 95000, "Cena (MP+T) - CZ": 95000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafická úprava a sazba soutěžních podmínek a zadání", "Jednotka": "soubor", "Cena za jednotku": 35000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 35000, "Cena (MP+T) - EN": 35000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 35000, "Cena (MP+T) - CZ": 35000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování katalogu", "Jednotka": "soubor", "Cena za jednotku": 50000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 50000, "Cena (MP+T) - EN": 50000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 50000, "Cena (MP+T) - CZ": 50000},
-    
-    {"Fáze": "Další náklady - externí dodavatelé", "Aktivita": "Grafické zpracování výstavy", "Jednotka": "soubor", "Cena za jednotku": 70000.0,
-     "Počet MJ (MP) - EN": 1.0, "Počet MJ (MP+T) - EN": 1.0, "Cena (MP) - EN": 70000, "Cena (MP+T) - EN": 70000,
-     "Počet MJ (MP) - CZ": 1.0, "Počet MJ (MP+T) - CZ": 1.0, "Cena (MP) - CZ": 70000, "Cena (MP+T) - CZ": 70000},
-
-    # Odměny
-    {"Fáze": "Odměny", "Aktivita": "Odměny zahraničních porotců", "Jednotka": "odměna celková", "Cena za jednotku": 255000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 3.0, "Cena (MP) - EN": 765000, "Cena (MP+T) - EN": 765000,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 0.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Odměny českých porotců", "Jednotka": "hod", "Cena za jednotku": 1800.0,
-     "Počet MJ (MP) - EN": 192.0, "Počet MJ (MP+T) - EN": 192.0, "Cena (MP) - EN": 345600, "Cena (MP+T) - EN": 345600,
-     "Počet MJ (MP) - CZ": 384.0, "Počet MJ (MP+T) - CZ": 384.0, "Cena (MP) - CZ": 691200, "Cena (MP+T) - CZ": 691200},
-    
-    {"Fáze": "Odměny", "Aktivita": "Odměny odborníků poroty", "Jednotka": "hod", "Cena za jednotku": 1800.0,
-     "Počet MJ (MP) - EN": 192.0, "Počet MJ (MP+T) - EN": 256.0, "Cena (MP) - EN": 345600, "Cena (MP+T) - EN": 460800,
-     "Počet MJ (MP) - CZ": 192.0, "Počet MJ (MP+T) - CZ": 256.0, "Cena (MP) - CZ": 345600, "Cena (MP+T) - CZ": 460800},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - mezinárodní soutěž", "Jednotka": "odměna pro tým", "Cena za jednotku": 1000000.0,
-     "Počet MJ (MP) - EN": 5.0, "Počet MJ (MP+T) - EN": 5.0, "Cena (MP) - EN": 5000000, "Cena (MP+T) - EN": 5000000,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 0.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - mezinárodní soutěž", "Jednotka": "odměna pro tým", "Cena za jednotku": 1000000.0,
-     "Počet MJ (MP) - EN": 3.0, "Počet MJ (MP+T) - EN": 3.0, "Cena (MP) - EN": 3000000, "Cena (MP+T) - EN": 3000000,
-     "Počet MJ (MP) - CZ": 0.0, "Počet MJ (MP+T) - CZ": 0.0, "Cena (MP) - CZ": 0, "Cena (MP+T) - CZ": 0},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 1. fáze (1. + 2. SW) - soutěž v češtině", "Jednotka": "odměna pro tým", "Cena za jednotku": 750000.0,
-     "Počet MJ (MP) - EN": 0.0, "Počet MJ (MP+T) - EN": 0.0, "Cena (MP) - EN": 0, "Cena (MP+T) - EN": 0,
-     "Počet MJ (MP) - CZ": 5.0, "Počet MJ (MP+T) - CZ": 5.0, "Cena (MP) - CZ": 3750000, "Cena (MP+T) - CZ": 3750000},
-    
-    {"Fáze": "Odměny", "Aktivita": "Skicovné 2. fáze (3. SW) - soutěž v češtině", "Jednotka": "odměna pro tým", "Cena za jednotku": 750000.0,
-     "Počet MJ (MP) - EN": 0.0, "Počet MJ (MP+T) - EN": 0.0, "Cena (MP) - EN": 0, "Cena (MP+T) - EN": 0,
-     "Počet MJ (MP) - CZ": 3.0, "Počet MJ (MP+T) - CZ": 3.0, "Cena (MP) - CZ": 2250000, "Cena (MP+T) - CZ": 2250000}
-]
-
-# --- Vytvoření DataFrame ---
-df = pd.DataFrame(activities_data)
-
-# --- Výpočet hodnot na základě výběru ---
-if variant == "Mezinárodní soutěžní workshop":
-    variant_suffix = "EN"
+# --- Nastavenie stĺpcov podľa variantu ---
+if variant == "SK":
+    variant_suffix = "SK"
 else:
     variant_suffix = "CZ"
         
 if unit_type == "Počet jednotek (změna MP)":
     unit_col = f"Počet MJ (MP) - {variant_suffix}"
     price_col = f"Cena (MP) - {variant_suffix}"
-        else:
+else:
     unit_col = f"Počet MJ (MP+T) - {variant_suffix}"
     price_col = f"Cena (MP+T) - {variant_suffix}"
 
-# --- Přidání sloupců pro editaci ---
+# --- Pridanie stĺpcov pre editáciu ---
 df['Vybrané'] = True
 df['Upravené množství'] = df[unit_col]
 df['Upravená cena za jednotku'] = df['Cena za jednotku']
 df['Poznámky'] = ''
 
-# --- Filtrování fází ---
+# --- Filtrovanie fáz ---
 phases = df['Fáze'].unique()
 selected_phases = st.sidebar.multiselect(
     "Filtrujte fáze:",
@@ -621,12 +526,12 @@ selected_phases = st.sidebar.multiselect(
     help="Vyberte fáze, které chcete zobrazit."
 )
 
-# --- Filtrování dat ---
+# --- Filtrovanie dát ---
 filtered_df = df[df['Fáze'].isin(selected_phases)].copy()
 
-# --- KPI cards ---
+# --- KPI karty ---
 col1, col2, col3 = st.columns(3)
-                    with col1:
+with col1:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Celkové náklady</h3>
@@ -634,7 +539,7 @@ col1, col2, col3 = st.columns(3)
         <p>Celková suma</p>
     </div>
     """, unsafe_allow_html=True)
-                        with col2:
+with col2:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Počet aktivit</h3>
@@ -642,7 +547,7 @@ col1, col2, col3 = st.columns(3)
         <p>Celkový počet</p>
     </div>
     """, unsafe_allow_html=True)
-                        with col3:
+with col3:
     st.markdown(f"""
     <div class="metric-card">
         <h3>Průměrná cena</h3>
@@ -656,7 +561,7 @@ st.markdown("""
 <div class="progress-bar"></div>
 """, unsafe_allow_html=True)
 
-# --- Interaktivní tabulka ---
+# --- Interaktívna tabuľka ---
 st.markdown("""
 <div class="phase-header">
     <h3>Interaktivní tabulka aktivit</h3>
@@ -677,7 +582,7 @@ edited_df = st.data_editor(
     }
 )
 
-# --- Výpočet upravených hodnot ---
+# --- Výpočet upravených hodnôt ---
 selected_activities = edited_df[edited_df['Vybrané'] == True].copy()
 selected_activities['Náklady'] = selected_activities['Upravené množství'] * selected_activities['Upravená cena za jednotku']
 total_selected_cost = selected_activities['Náklady'].sum()
@@ -728,7 +633,7 @@ if len(selected_activities) > 0:
         height=700,
         margin=dict(t=80, l=0, r=0, b=0),
         paper_bgcolor='rgba(255,255,255,0.98)',
-        font=dict(family='Inter, sans-serif', size=18, color='#1e2937')
+        font=dict(family='Inter, sans-serif', size=18, color='#1e293b')
     )
     fig_sunburst.update_traces(
         hovertemplate='<b>%{label}</b><br>Celkové náklady: %{value:,.0f} Kč<extra></extra>',
@@ -739,7 +644,7 @@ if len(selected_activities) > 0:
         textfont_family='Inter, sans-serif'
     )
     st.plotly_chart(fig_sunburst, use_container_width=True)
-                else:
+else:
     st.markdown("""
     <div style="text-align: center; padding: 3rem; color: #6b7280; font-size: 1.1rem;">
         <p>Žádné aktivity nejsou vybrány. Vyberte alespoň jednu aktivitu pro zobrazení grafu.</p>
@@ -797,15 +702,11 @@ with col3:
 
 # --- Sticky summary ---
 if len(selected_activities) > 0:
-    avg_cost = total_selected_cost / len(selected_activities)
     st.markdown(f"""
     <div class="sticky-summary">
-        Celkové náklady: {total_selected_cost:,.0f} Kč | Vybrané aktivity: {len(selected_activities)} | Průměrná cena: {avg_cost:,.0f} Kč
+        <h4>📊 Aktuální souhrn</h4>
+        <div class="total-cost">{total_selected_cost:,.0f} Kč</div>
+        <div class="activity-count">{len(selected_activities)} aktivit vybráno</div>
     </div>
     """, unsafe_allow_html=True)
-else:
-    st.markdown(f"""
-    <div class="sticky-summary">
-        Celkové náklady: 0 Kč | Vybrané aktivity: 0 | Průměrná cena: 0 Kč
-    </div>
-    """, unsafe_allow_html=True)
+
