@@ -608,7 +608,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     dejavu_bold_path = os.path.join(font_dir, 'DejaVuSans-Bold.ttf')
     if not os.path.exists(dejavu_path) or not os.path.exists(dejavu_bold_path):
         raise FileNotFoundError(
-            f"Chýbajúci font! Nahrajte súbory 'DejaVuSans.ttf' a 'DejaVuSans-Bold.ttf' do priečinka 'fonts/' v repozitári. "
+            f"Chýbajúci font! Nahrajte súbory 'DejaVuSans.ttf' a 'DejaVuSans-Bold.ttf' do priečinka 'onts/' v repozitári. "
             f"Cesty hľadaných súborov: {dejavu_path}, {dejavu_bold_path}"
         )
     pdfmetrics.registerFont(TTFont('DejaVuSans', dejavu_path))
@@ -716,6 +716,8 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                 ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),
                 ('FONTNAME', (0, 0), (-1, 0), font_bold),
                 ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
