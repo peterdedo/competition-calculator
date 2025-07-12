@@ -599,13 +599,15 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
     
-    # Registrácia fontu s podporou českej diakritiky
+    # Registrácia fontov s podporou českej diakritiky
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     import os
-    font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSans.ttf')
-    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    font_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+    pdfmetrics.registerFont(TTFont('DejaVuSans', os.path.join(font_dir, 'DejaVuSans.ttf')))
+    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', os.path.join(font_dir, 'DejaVuSans-Bold.ttf')))
     font_name = 'DejaVuSans'
+    font_bold = 'DejaVuSans-Bold'
     
     # Štýly s podporou českých znakov
     styles = getSampleStyleSheet()
@@ -616,7 +618,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#059669'),
         alignment=TA_CENTER,
         spaceAfter=30,
-        fontName=font_name,
+        fontName=font_bold,
     )
     heading_style = ParagraphStyle(
         'CustomHeading',
@@ -625,7 +627,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#10b981'),
         alignment=TA_LEFT,
         spaceAfter=12,
-        fontName=font_name,
+        fontName=font_bold,
     )
     normal_style = ParagraphStyle(
         'CustomNormal',
@@ -660,7 +662,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         ('BACKGROUND', (0, 0), (-1, 0), HexColor('#059669')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), font_name),
+        ('FONTNAME', (0, 0), (-1, 0), font_bold),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), HexColor('#f8fafc')),
@@ -707,7 +709,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                 ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (-1, 0), font_name),
+                ('FONTNAME', (0, 0), (-1, 0), font_bold),
                 ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
                 ('BACKGROUND', (0, 1), (-1, -2), HexColor('#ffffff')),
@@ -719,7 +721,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
                 ('TOPPADDING', (0, 0), (-1, -1), 4),
                 ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-                ('FONTNAME', (0, -1), (-1, -1), font_name),
+                ('FONTNAME', (0, -1), (-1, -1), font_bold),
                 ('FONTSIZE', (0, -1), (-1, -1), 10),
             ]))
             story.append(activity_table)
