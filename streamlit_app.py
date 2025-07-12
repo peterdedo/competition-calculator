@@ -23,13 +23,13 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
     html, body, .main { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important; font-family: 'Inter', sans-serif; }
     .main-header {
-        background: linear-gradient(120deg, #059669 0%, #10b981 40%, #34d399 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 40%, #A6D96A 100%);
         padding: 4rem 2rem 2.5rem 2rem;
         margin: -2rem -2rem 2.5rem -2rem;
         color: white;
         text-align: center;
         border-radius: 0 0 2.5rem 2.5rem;
-        box-shadow: 0 12px 48px rgba(5,150,105,0.18);
+        box-shadow: 0 12px 48px rgba(3,93,170,0.13);
         position: relative;
         overflow: hidden;
     }
@@ -38,7 +38,7 @@ st.markdown("""
         font-weight: 900;
         margin-bottom: 0.5rem;
         letter-spacing: -0.03em;
-        text-shadow: 0 2px 16px rgba(5,150,105,0.12);
+        text-shadow: 0 2px 16px rgba(3,93,170,0.10);
     }
     .main-header p {
         font-size: 1.25rem;
@@ -55,17 +55,17 @@ st.markdown("""
         font-size: 1.1rem;
         margin-top: 1.5rem;
         letter-spacing: 0.08em;
-        box-shadow: 0 2px 12px rgba(5,150,105,0.08);
+        box-shadow: 0 2px 12px rgba(80,175,50,0.08);
     }
     .main-header .hero-bg {
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect fill="none"/><circle cx="80" cy="80" r="60" fill="%2310b981" fill-opacity="0.08"/><circle cx="90%" cy="30" r="80" fill="%23059669" fill-opacity="0.06"/><rect x="60%" y="60%" width="120" height="120" rx="30" fill="%2334d399" fill-opacity="0.07"/></svg>');
+        background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><rect fill="none"/><circle cx="80" cy="80" r="60" fill="%2350AF32" fill-opacity="0.08"/><circle cx="90%" cy="30" r="80" fill="%23035DAA" fill-opacity="0.06"/><rect x="60%" y="60%" width="120" height="120" rx="30" fill="%23A6D96A" fill-opacity="0.07"/></svg>');
         z-index: 0;
         pointer-events: none;
     }
     .sidebar-header {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 100%);
         padding: 2rem 1rem 1.5rem 1rem;
         border-radius: 1.5rem;
         color: white;
@@ -73,7 +73,7 @@ st.markdown("""
         text-align: center;
         font-weight: 700;
         font-size: 1.2rem;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.10);
+        box-shadow: 0 4px 24px rgba(3,93,170,0.10);
         position: sticky;
         top: 1.5rem;
         z-index: 10;
@@ -82,32 +82,32 @@ st.markdown("""
         font-size: 1.1rem !important;
     }
     .metric-card {
-        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
+        background: linear-gradient(120deg, #fff 60%, #A6D96A 100%);
         padding: 2.2rem 1.5rem 1.5rem 1.5rem;
         border-radius: 1.5rem;
-        color: #1e2937;
+        color: #333333;
         text-align: center;
         margin: 1rem 0;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
+        box-shadow: 0 4px 24px rgba(3,93,170,0.08);
+        border: 1.5px solid #B3B6B5;
         position: relative;
         overflow: hidden;
         transition: box-shadow 0.2s, transform 0.2s;
     }
     .metric-card:hover {
-        box-shadow: 0 8px 32px rgba(5,150,105,0.16);
+        box-shadow: 0 8px 32px rgba(3,93,170,0.16);
         transform: translateY(-2px) scale(1.01);
     }
     .metric-card h3 {
         font-size: 1.2rem;
         font-weight: 700;
-        color: #10b981;
+        color: #50AF32;
         margin-bottom: 0.2rem;
     }
     .metric-card h2 {
         font-size: 2.2rem;
         font-weight: 900;
-        color: #059669;
+        color: #035DAA;
         margin: 0.2rem 0 0.1rem 0;
         letter-spacing: -0.02em;
     }
@@ -117,28 +117,28 @@ st.markdown("""
         margin: 0;
     }
     .phase-header {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 100%);
         padding: 1.5rem 2rem;
         border-radius: 1.2rem;
         color: white;
         margin: 2rem 0 1.2rem 0;
         font-weight: 700;
         font-size: 1.3rem;
-        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
-        border-left: 8px solid #34d399;
+        box-shadow: 0 4px 20px rgba(3,93,170,0.10);
+        border-left: 8px solid #A6D96A;
         position: relative;
     }
     .chart-container {
-        background: linear-gradient(120deg, #fff 60%, #e0e7ef 100%);
+        background: linear-gradient(120deg, #fff 60%, #A6D96A 100%);
         border-radius: 1.5rem;
         padding: 2.5rem 2rem 2rem 2rem;
         margin: 2rem 0;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
+        box-shadow: 0 4px 24px rgba(3,93,170,0.08);
+        border: 1.5px solid #B3B6B5;
         position: relative;
     }
     .stButton > button {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 100%);
         color: white;
         border: none;
         border-radius: 1rem;
@@ -146,23 +146,23 @@ st.markdown("""
         font-weight: 700;
         font-size: 1.1rem;
         transition: all 0.2s;
-        box-shadow: 0 4px 20px rgba(5,150,105,0.10);
+        box-shadow: 0 4px 20px rgba(3,93,170,0.10);
         text-transform: none;
         letter-spacing: 0.02em;
     }
     .stButton > button:hover {
         transform: translateY(-2px) scale(1.03);
-        box-shadow: 0 8px 32px rgba(5,150,105,0.18);
-        background: linear-gradient(120deg, #047857 0%, #34d399 100%);
+        box-shadow: 0 8px 32px rgba(80,175,50,0.18);
+        background: linear-gradient(120deg, #035DAA 0%, #A6D96A 100%);
     }
     .progress-bar {
-        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(90deg, #50AF32 0%, #035DAA 100%);
         height: 8px;
         border-radius: 4px;
         margin: 2rem 0 1.5rem 0;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(5,150,105,0.10);
+        box-shadow: 0 2px 8px rgba(3,93,170,0.10);
     }
     .progress-bar::after {
         content: '';
@@ -183,14 +183,14 @@ st.markdown("""
         bottom: 0;
         left: 0;
         width: 100vw;
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 100%);
         color: white;
         text-align: center;
         padding: 1.2rem 0.5rem 1rem 0.5rem;
         z-index: 9999;
         font-weight: 700;
         font-size: 1.25rem;
-        box-shadow: 0 -4px 24px rgba(5,150,105,0.12);
+        box-shadow: 0 -4px 24px rgba(3,93,170,0.12);
         border-top-left-radius: 1.5rem;
         border-top-right-radius: 1.5rem;
         letter-spacing: 0.02em;
@@ -199,11 +199,11 @@ st.markdown("""
     .dataframe {
         border-radius: 1.2rem;
         overflow: hidden;
-        box-shadow: 0 4px 24px rgba(5,150,105,0.08);
-        border: 1.5px solid #e5e7eb;
+        box-shadow: 0 4px 24px rgba(3,93,170,0.08);
+        border: 1.5px solid #B3B6B5;
     }
     .dataframe th {
-        background: linear-gradient(120deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(120deg, #035DAA 0%, #50AF32 100%);
         color: white;
         font-weight: 700;
         padding: 1rem;
@@ -211,12 +211,12 @@ st.markdown("""
     }
     .dataframe td {
         padding: 0.85rem;
-        border-bottom: 1px solid #e5e7eb;
+        border-bottom: 1px solid #B3B6B5;
         font-size: 1.05rem;
     }
     .stCheckbox > label, .stRadio > label {
         font-weight: 600;
-        color: #1e2937;
+        color: #333333;
     }
     @media (max-width: 900px) {
         .main-header h1 { font-size: 2.1rem; }
@@ -842,29 +842,3 @@ else:
         Celkové náklady: 0 Kč | Vybrané aktivity: 0 | Průměrná cena: 0 Kč
     </div>
     """, unsafe_allow_html=True)
-
-# --- Interaktívne farebné bloky podľa fáz (po interaktívnej tabuľke) ---
-phase_colors = [
-    "#035DAA",  # modrá
-    "#50AF32",  # zelená
-    "#A6D96A",  # svetlozelená
-    "#B3B6B5",  # šedá
-]
-phase_icons = ["🔍", "🏗️", "🗂️", "📢", "💸", "🏆", "📊"]
-
-st.markdown("""
-<div style='margin-top:2.5rem;'></div>
-""", unsafe_allow_html=True)
-
-for idx, phase in enumerate(selected_activities['Fáze'].unique()):
-    color = phase_colors[idx % len(phase_colors)]
-    icon = phase_icons[idx % len(phase_icons)]
-    st.markdown(f"""
-    <div style='background:{color};color:white;padding:0.7rem 1rem 0.7rem 1rem;
-                border-radius:0.7rem;margin-top:1.5rem;margin-bottom:0.5rem;
-                font-size:1.3rem;font-weight:700;letter-spacing:0.01em;'>
-        {icon} {phase}
-    </div>
-    """, unsafe_allow_html=True)
-    phase_table = selected_activities[selected_activities['Fáze'] == phase][['Aktivita', 'Upravené množství', 'Upravená cena za jednotku', 'Náklady', 'Poznámky']]
-    st.dataframe(phase_table, use_container_width=True)
