@@ -5,13 +5,14 @@ from datetime import datetime
 from io import BytesIO
 import base64
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
+import os
 
 # --- Najmodernejší vizuál a UX podľa svetových štandardov ---
 st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
@@ -686,6 +687,14 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     story.append(Paragraph(f"Typ jednotek: {unit_type}", normal_style))
     story.append(Paragraph(f"Datum generování: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
     story.append(Spacer(1, 20))
+    
+    # Pridanie loga na začiatok PDF
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'logo web color.png')
+    if os.path.exists(logo_path):
+        img = Image(logo_path, width=140, height=40)
+        img.hAlign = 'CENTER'
+        story.append(img)
+        story.append(Spacer(1, 16))
     
     # Shrnutí
     story.append(Paragraph("Shrnutí projektu", heading_style))
