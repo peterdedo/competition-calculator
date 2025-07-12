@@ -708,7 +708,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
             
             for _, activity in phase_activities.iterrows():
                 table_data.append([
-                    Paragraph(str(activity['Aktivita']), normal_style),
+                    Paragraph(str(activity['Aktivita']), normal_style, splitLongWords=True),
                     Paragraph(f"{activity['Upravené množství']:.1f}", normal_style),
                     Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", normal_style),
                     Paragraph(f"{activity['Náklady']:,.0f} Kč", normal_style),
@@ -725,7 +725,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                 Paragraph('', normal_style)
             ])
             
-            activity_table = Table(table_data, colWidths=[2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
+            activity_table = Table(table_data, colWidths=[1.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
             activity_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
