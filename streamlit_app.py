@@ -599,13 +599,17 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
     
-    # Registrácia fontov s podporou českej diakritiky
+    # Registrácia fontov s podporou českej diakritiky cez absolútnu cestu
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     import os
-    font_dir = os.path.join(os.path.dirname(__file__), 'fonts')
-    pdfmetrics.registerFont(TTFont('DejaVuSans', os.path.join(font_dir, 'DejaVuSans.ttf')))
-    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', os.path.join(font_dir, 'DejaVuSans-Bold.ttf')))
+    font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
+    dejavu_path = os.path.join(font_dir, 'DejaVuSans.ttf')
+    dejavu_bold_path = os.path.join(font_dir, 'DejaVuSans-Bold.ttf')
+    assert os.path.exists(dejavu_path), f"Font file not found: {dejavu_path}"
+    assert os.path.exists(dejavu_bold_path), f"Font file not found: {dejavu_bold_path}"
+    pdfmetrics.registerFont(TTFont('DejaVuSans', dejavu_path))
+    pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', dejavu_bold_path))
     font_name = 'DejaVuSans'
     font_bold = 'DejaVuSans-Bold'
     
