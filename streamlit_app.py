@@ -634,13 +634,13 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     
     # Hlavička
     story.append(Paragraph("Kalkulátor soutěžního workshopu", title_style))
-    story.append(Paragraph(f"Variant: {variant}", normal_style))
+    story.append(Paragraph(f"Varianta: {variant}", normal_style))
     story.append(Paragraph(f"Typ jednotek: {unit_type}", normal_style))
-    story.append(Paragraph(f"Dátum generovania: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
+    story.append(Paragraph(f"Datum generování: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
     story.append(Spacer(1, 20))
     
     # Sumár
-    story.append(Paragraph("Sumár projektu", heading_style))
+    story.append(Paragraph("Shrnutí projektu", heading_style))
     summary_data = [
         ['Metrika', 'Hodnota'],
         ['Celkové náklady', f"{total_cost:,.0f} Kč"],
@@ -668,17 +668,17 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     story.append(summary_table)
     story.append(Spacer(1, 20))
     
-    # Detailné rozpísanie podľa fáz
+    # Detailní rozpis podle fází
     if len(selected_activities) > 0:
-        story.append(Paragraph("Detailné rozpísanie aktivit", heading_style))
+        story.append(Paragraph("Detailní rozpis aktivit", heading_style))
         
-        # Zoskupenie podľa fáz
+        # Seskupení podle fází
         phase_groups = selected_activities.groupby('Fáze')
         
         for phase, phase_activities in phase_groups:
             story.append(Paragraph(f"Fáze: {phase}", heading_style))
             
-            # Tabuľka aktivít pre fázu
+            # Tabulka aktivit pro fázi
             table_data = [['Aktivita', 'Množství', 'Cena za jednotku', 'Náklady', 'Poznámky']]
             
             for _, activity in phase_activities.iterrows():
@@ -690,9 +690,9 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                     activity['Poznámky'] if pd.notna(activity['Poznámky']) else ''
                 ])
             
-            # Pridanie súčtu fázy
+            # Přidání součtu fáze
             phase_total = phase_activities['Náklady'].sum()
-            table_data.append(['', '', 'SÚČET FÁZY:', f"{phase_total:,.0f} Kč", ''])
+            table_data.append(['', '', 'SOUČET FÁZE:', f"{phase_total:,.0f} Kč", ''])
             
             activity_table = Table(table_data, colWidths=[2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
             activity_table.setStyle(TableStyle([
@@ -717,16 +717,16 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
             story.append(activity_table)
             story.append(Spacer(1, 15))
     
-    # Graf (ak je dostupný)
+    # Graf (pokud je dostupný)
     if len(selected_activities) > 0:
         story.append(Paragraph("Vizualizace nákladů", heading_style))
-        story.append(Paragraph("Graf hierarchického rozložení nákladů je dostupný v interaktívnej verzii aplikácie.", normal_style))
+        story.append(Paragraph("Graf hierarchického rozložení nákladů je dostupný v interaktivní verzi aplikace.", normal_style))
         story.append(Spacer(1, 20))
     
-    # Záver
-    story.append(Paragraph("Záver", heading_style))
+    # Závěr
+    story.append(Paragraph("Závěr", heading_style))
     story.append(Paragraph(f"Celkové náklady na soutěžní workshop činí {total_cost:,.0f} Kč.", normal_style))
-    story.append(Paragraph("Tento dokument bol automaticky vygenerovaný kalkulátorom soutěžního workshopu.", normal_style))
+    story.append(Paragraph("Tento dokument byl automaticky vygenerován kalkulátorem soutěžního workshopu.", normal_style))
     
     # Vytvorenie PDF
     doc.build(story)
