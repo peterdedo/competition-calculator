@@ -696,20 +696,34 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
             story.append(Paragraph(f"Fáze: {phase}", heading_style))
             
             # Tabulka aktivit pro fázi
-            table_data = [['Aktivita', 'Množství', 'Cena za jednotku', 'Náklady', 'Poznámky']]
+            table_data = [
+                [
+                    Paragraph('Aktivita', heading_style),
+                    Paragraph('Množství', heading_style),
+                    Paragraph('Cena za jednotku', heading_style),
+                    Paragraph('Náklady', heading_style),
+                    Paragraph('Poznámky', heading_style)
+                ]
+            ]
             
             for _, activity in phase_activities.iterrows():
                 table_data.append([
-                    activity['Aktivita'],
-                    f"{activity['Upravené množství']:.1f}",
-                    f"{activity['Upravená cena za jednotku']:,.0f} Kč",
-                    f"{activity['Náklady']:,.0f} Kč",
-                    activity['Poznámky'] if pd.notna(activity['Poznámky']) else ''
+                    Paragraph(str(activity['Aktivita']), normal_style),
+                    Paragraph(f"{activity['Upravené množství']:.1f}", normal_style),
+                    Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", normal_style),
+                    Paragraph(f"{activity['Náklady']:,.0f} Kč", normal_style),
+                    Paragraph(str(activity['Poznámky']) if pd.notna(activity['Poznámky']) else '', normal_style)
                 ])
             
             # Přidání součtu fáze
             phase_total = phase_activities['Náklady'].sum()
-            table_data.append(['', '', 'SOUČET FÁZE:', f"{phase_total:,.0f} Kč", ''])
+            table_data.append([
+                Paragraph('', normal_style),
+                Paragraph('', normal_style),
+                Paragraph('SOUČET FÁZE:', heading_style),
+                Paragraph(f"{phase_total:,.0f} Kč", heading_style),
+                Paragraph('', normal_style)
+            ])
             
             activity_table = Table(table_data, colWidths=[2.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
             activity_table.setStyle(TableStyle([
