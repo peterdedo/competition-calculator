@@ -646,6 +646,37 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         fontName=font_name,
     )
     
+    activity_style = ParagraphStyle(
+        'ActivitySmall',
+        parent=normal_style,
+        fontSize=10,
+        leading=12,
+        spaceAfter=2,
+    )
+    number_style = ParagraphStyle(
+        'NumberRight',
+        parent=normal_style,
+        fontSize=10,
+        leading=12,
+        alignment=TA_RIGHT,
+    )
+    notes_style = ParagraphStyle(
+        'Notes',
+        parent=normal_style,
+        fontSize=10,
+        leading=12,
+        alignment=TA_LEFT,
+    )
+    sum_style = ParagraphStyle(
+        'SumBold',
+        parent=normal_style,
+        fontSize=11,
+        leading=13,
+        alignment=TA_RIGHT,
+        textColor=HexColor('#059669'),
+        fontName=font_bold,
+    )
+    
     # Obsah dokumentu
     story = []
     
@@ -708,11 +739,11 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
             
             for _, activity in phase_activities.iterrows():
                 table_data.append([
-                    Paragraph(str(activity['Aktivita']), normal_style, splitLongWords=True),
-                    Paragraph(f"{activity['Upravené množství']:.1f}", normal_style),
-                    Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", normal_style),
-                    Paragraph(f"{activity['Náklady']:,.0f} Kč", normal_style),
-                    Paragraph(str(activity['Poznámky']) if pd.notna(activity['Poznámky']) else '', normal_style)
+                    Paragraph(str(activity['Aktivita']), activity_style),
+                    Paragraph(f"{activity['Upravené množství']:.1f}", number_style),
+                    Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", number_style),
+                    Paragraph(f"{activity['Náklady']:,.0f} Kč", number_style),
+                    Paragraph(str(activity['Poznámky']) if pd.notna(activity['Poznámky']) else '', notes_style)
                 ])
             
             # Přidání součtu fáze
@@ -720,33 +751,46 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
             table_data.append([
                 Paragraph('', normal_style),
                 Paragraph('', normal_style),
-                Paragraph('SOUČET FÁZE:', heading_style),
-                Paragraph(f"{phase_total:,.0f} Kč", heading_style),
+                Paragraph('SOUČET FÁZE:', sum_style),
+                Paragraph(f"{phase_total:,.0f} Kč", sum_style),
                 Paragraph('', normal_style)
             ])
             
-            activity_table = Table(table_data, colWidths=[1.5*inch, 0.8*inch, 1.2*inch, 1.2*inch, 1.5*inch])
-            activity_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
+            # Tabuľka s profesionálnym rozložením
+            activity_table = Table(table_data, colWidths=[1.5*inch, 0.7*inch, 1.2*inch, 1.2*inch, 2.2*inch])
+            # Profesionálny štýl tabuľky
+            table_style = [
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#059669')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), font_bold),
+                ('FONTSIZE', (0, 0), (-1, 0), 11),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+                ('TOPPADDING', (0, 0), (-1, 0), 8),
+                ('BACKGROUND', (0, 1), (-1, -2), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('WORDWRAP', (0, 0), (-1, -1), 'CJK'),
-                ('FONTNAME', (0, 0), (-1, 0), font_bold),
-                ('FONTSIZE', (0, 0), (-1, 0), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-                ('BACKGROUND', (0, 1), (-1, -2), HexColor('#ffffff')),
-                ('BACKGROUND', (0, -1), (-1, -1), HexColor('#f3f4f6')),
-                ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('FONTNAME', (0, 1), (-1, -1), font_name),
-                ('FONTSIZE', (0, 1), (-1, -1), 9),
-                ('LEFTPADDING', (0, 0), (-1, -1), 4),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 1), (-1, -1), 4),
                 ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+                # Alternujúce pruhovanie riadkov
+                ('BACKGROUND', (0, 1), (-1, -3), colors.whitesmoke),
+            ]
+            # Alternujúce pruhovanie (každý druhý riadok)
+            for i in range(1, len(table_data)-1):
+                if i % 2 == 0:
+                    table_style.append(('BACKGROUND', (0, i), (-1, i), colors.lightgrey))
+            # Zvýraznenie riadku so súčtom
+            table_style += [
+                ('BACKGROUND', (0, -1), (-1, -1), HexColor('#e0f7ef')),
                 ('FONTNAME', (0, -1), (-1, -1), font_bold),
-                ('FONTSIZE', (0, -1), (-1, -1), 10),
-            ]))
+                ('TEXTCOLOR', (0, -1), (-1, -1), HexColor('#059669')),
+                ('FONTSIZE', (0, -1), (-1, -1), 11),
+                ('ALIGN', (2, -1), (3, -1), 'RIGHT'),
+            ]
+            activity_table.setStyle(TableStyle(table_style))
             story.append(activity_table)
             story.append(Spacer(1, 15))
     
