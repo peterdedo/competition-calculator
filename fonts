@@ -1,3 +1,1 @@
-git add fonts/DejaVuSans.ttf fonts/DejaVuSans-Bold.ttf
-git commit -m "Pridanie fontov DejaVuSans pre PDF export na Streamlit Cloud"
-git push
+
