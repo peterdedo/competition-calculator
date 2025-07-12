@@ -599,7 +599,10 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
     
-    # Štýly
+    # Nastavení UTF-8 kódování pro české znaky
+    # Použijeme vstavané fonty s podporou UTF-8
+    
+    # Štýly s podporou českých znaků
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'CustomTitle',
@@ -608,7 +611,8 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#059669'),
         alignment=TA_CENTER,
         spaceAfter=30,
-        fontName='Helvetica-Bold'
+        fontName='Helvetica-Bold',
+        encoding='utf-8'
     )
     heading_style = ParagraphStyle(
         'CustomHeading',
@@ -617,7 +621,8 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#10b981'),
         alignment=TA_LEFT,
         spaceAfter=12,
-        fontName='Helvetica-Bold'
+        fontName='Helvetica-Bold',
+        encoding='utf-8'
     )
     normal_style = ParagraphStyle(
         'CustomNormal',
@@ -626,7 +631,8 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#1e2937'),
         alignment=TA_LEFT,
         spaceAfter=6,
-        fontName='Helvetica'
+        fontName='Helvetica',
+        encoding='utf-8'
     )
     
     # Obsah dokumentu
@@ -742,11 +748,11 @@ st.markdown("""
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("Export do Excel", type="primary"):
-        # Vytvorenie Excel súboru v BytesIO
+        # Vytvorenie Excel súboru
         output = BytesIO()
         
-        # Vytvorenie Excel writer s BytesIO
-        with pd.ExcelWriter(output, engine='openpyxl', mode='w') as writer:
+        # Vytvorenie Excel writer
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
             selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
             if len(selected_activities) > 0:
                 avg_cost = total_selected_cost / len(selected_activities)
