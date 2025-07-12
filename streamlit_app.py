@@ -842,3 +842,29 @@ else:
         Celkové náklady: 0 Kč | Vybrané aktivity: 0 | Průměrná cena: 0 Kč
     </div>
     """, unsafe_allow_html=True)
+
+# --- Interaktívne farebné bloky podľa fáz (po interaktívnej tabuľke) ---
+phase_colors = [
+    "#035DAA",  # modrá
+    "#50AF32",  # zelená
+    "#A6D96A",  # svetlozelená
+    "#B3B6B5",  # šedá
+]
+phase_icons = ["🔍", "🏗️", "🗂️", "📢", "💸", "🏆", "📊"]
+
+st.markdown("""
+<div style='margin-top:2.5rem;'></div>
+""", unsafe_allow_html=True)
+
+for idx, phase in enumerate(selected_activities['Fáze'].unique()):
+    color = phase_colors[idx % len(phase_colors)]
+    icon = phase_icons[idx % len(phase_icons)]
+    st.markdown(f"""
+    <div style='background:{color};color:white;padding:0.7rem 1rem 0.7rem 1rem;
+                border-radius:0.7rem;margin-top:1.5rem;margin-bottom:0.5rem;
+                font-size:1.3rem;font-weight:700;letter-spacing:0.01em;'>
+        {icon} {phase}
+    </div>
+    """, unsafe_allow_html=True)
+    phase_table = selected_activities[selected_activities['Fáze'] == phase][['Aktivita', 'Upravené množství', 'Upravená cena za jednotku', 'Náklady', 'Poznámky']]
+    st.dataframe(phase_table, use_container_width=True)
