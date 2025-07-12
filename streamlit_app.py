@@ -742,8 +742,11 @@ st.markdown("""
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("Export do Excel", type="primary"):
+        # Vytvorenie Excel súboru v BytesIO
         output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        
+        # Vytvorenie Excel writer s BytesIO
+        with pd.ExcelWriter(output, engine='openpyxl', mode='w') as writer:
             selected_activities.to_excel(writer, sheet_name='Vybrané aktivity', index=False)
             if len(selected_activities) > 0:
                 avg_cost = total_selected_cost / len(selected_activities)
@@ -759,7 +762,11 @@ with col1:
             }
             summary_df = pd.DataFrame(summary_data)
             summary_df.to_excel(writer, sheet_name='Shrnutí', index=False)
+        
+        # Reset pozície v BytesIO
         output.seek(0)
+        
+        # Stiahnutie súboru
         st.download_button(
             label="Stáhnout Excel soubor",
             data=output.getvalue(),
