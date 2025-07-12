@@ -13,6 +13,7 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
 import os
+import matplotlib.pyplot as plt
 
 # --- Najmodernejší vizuál a UX podľa svetových štandardov ---
 st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
@@ -615,224 +616,158 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     font_name = 'DejaVuSans'
     font_bold = 'DejaVuSans-Bold'
     styles = getSampleStyleSheet()
-    # --- Decentné, vzdušné štýly ---
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=22,
-        textColor=HexColor('#059669'),
-        alignment=TA_CENTER,
-        spaceAfter=8,
-        fontName=font_bold,
-        leading=26,
-    )
-    heading_style = ParagraphStyle(
-        'CustomHeading',
-        parent=styles['Heading2'],
-        fontSize=13,
-        textColor=HexColor('#10b981'),
-        alignment=TA_LEFT,
-        spaceAfter=4,
-        fontName=font_bold,
-        leading=16,
-    )
-    section_heading_style = ParagraphStyle(
-        'SectionHeading',
-        parent=heading_style,
-        fontSize=12,
-        textColor=HexColor('#059669'),
-        alignment=TA_LEFT,
-        spaceAfter=3,
-        fontName=font_bold,
-        leading=14,
-    )
-    normal_style = ParagraphStyle(
-        'CustomNormal',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=HexColor('#1e2937'),
-        alignment=TA_LEFT,
-        spaceAfter=2,
-        fontName=font_name,
-    )
-    activity_style = ParagraphStyle(
-        'ActivitySmall',
-        parent=normal_style,
-        fontSize=9,
-        leading=11,
-        spaceAfter=1,
-    )
-    number_style = ParagraphStyle(
-        'NumberRight',
-        parent=normal_style,
-        fontSize=9,
-        leading=11,
-        alignment=TA_RIGHT,
-    )
-    notes_style = ParagraphStyle(
-        'Notes',
-        parent=normal_style,
-        fontSize=8,
-        leading=10,
-        alignment=TA_LEFT,
-        backColor=HexColor('#f3f4f6'),
-    )
-    sum_style = ParagraphStyle(
-        'SumBold',
-        parent=normal_style,
-        fontSize=10,
-        leading=12,
-        alignment=TA_RIGHT,
-        textColor=HexColor('#059669'),
-        fontName=font_bold,
-    )
-    meta_style = ParagraphStyle(
-        'Meta',
-        parent=normal_style,
-        fontSize=7,
-        textColor=HexColor('#6b7280'),
-        alignment=TA_RIGHT,
-        spaceAfter=1,
-    )
+    blue = '#035DAA'
+    green = '#50AF32'
+    gray = '#B3B6B5'
+    dark = '#333333'
+    light = '#F8F8F8'
+    phase_colors = [blue, green, gray, '#F8F8F8', '#50AF32', '#035DAA', '#B3B6B5']
+    phase_icons = ['🔍', '🏗️', '🗂️', '📢', '💸', '🏆', '📊']
+    title_style = ParagraphStyle('CoverTitle', parent=styles['Heading1'], fontSize=28, textColor=HexColor(blue), alignment=TA_CENTER, spaceAfter=10, fontName=font_bold, leading=34)
+    subtitle_style = ParagraphStyle('CoverSubtitle', parent=styles['Heading2'], fontSize=16, textColor=HexColor(dark), alignment=TA_CENTER, spaceAfter=18, fontName=font_name, leading=20)
+    callout_title = ParagraphStyle('CalloutTitle', parent=styles['Heading3'], fontSize=13, textColor=HexColor(green), alignment=TA_CENTER, fontName=font_bold, leading=16)
+    callout_value = ParagraphStyle('CalloutValue', parent=styles['Normal'], fontSize=18, textColor=HexColor(blue), alignment=TA_CENTER, fontName=font_bold, leading=22)
+    meta_style = ParagraphStyle('Meta', parent=styles['Normal'], fontSize=8, textColor=HexColor(gray), alignment=TA_RIGHT, spaceAfter=1, fontName=font_name)
+    phase_title_style = ParagraphStyle('PhaseTitle', parent=styles['Heading2'], fontSize=18, textColor=HexColor('#fff'), alignment=TA_LEFT, spaceAfter=0, fontName=font_bold, leading=22)
+    table_header_style = ParagraphStyle('TableHeader', parent=styles['Heading3'], fontSize=10, textColor=HexColor(blue), alignment=TA_CENTER, fontName=font_bold, leading=12)
+    table_cell_style = ParagraphStyle('TableCell', parent=styles['Normal'], fontSize=9, textColor=HexColor(dark), alignment=TA_LEFT, fontName=font_name, leading=11)
+    table_number_style = ParagraphStyle('TableNumber', parent=styles['Normal'], fontSize=9, textColor=HexColor(dark), alignment=TA_RIGHT, fontName=font_name, leading=11)
+    sum_style = ParagraphStyle('SumBold', parent=styles['Normal'], fontSize=10, textColor=HexColor(green), alignment=TA_RIGHT, fontName=font_bold, leading=12)
+    infobox_title = ParagraphStyle('InfoboxTitle', parent=styles['Normal'], fontSize=10, textColor=HexColor('#fff'), alignment=TA_CENTER, fontName=font_bold, leading=12)
+    infobox_value = ParagraphStyle('InfoboxValue', parent=styles['Normal'], fontSize=13, textColor=HexColor('#fff'), alignment=TA_CENTER, fontName=font_bold, leading=16)
+    # --- Cover page ---
     story = []
-    # Metaúdaje vpravo hore
-    story.append(Paragraph(f"<b>Generované:</b> {datetime.now().strftime('%d.%m.%Y %H:%M')}", meta_style))
-    story.append(Spacer(1, 1))
-    # Logo na stred, menšie
+    story.append(Paragraph(f"<b>Generováno:</b> {datetime.now().strftime('%d.%m.%Y %H:%M')}", meta_style))
+    story.append(Spacer(1, 8))
     logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets', 'logo web color.png')
     if os.path.exists(logo_path):
-        img = Image(logo_path, width=90, height=28)
+        img = Image(logo_path, width=110, height=34)
         img.hAlign = 'CENTER'
         story.append(img)
-        story.append(Spacer(1, 4))
-    # Hlavný nadpis
-    story.append(Paragraph("Kalkulátor soutěžního workshopu", title_style))
-    story.append(Spacer(1, 1))
-    # Podnadpisy
-    story.append(Paragraph(f"<b>Varianta:</b> {variant}", normal_style))
-    story.append(Paragraph(f"<b>Typ jednotek:</b> {unit_type}", normal_style))
-    story.append(Spacer(1, 4))
-    # Oddelenie sekcie pásikom (jemný)
-    story.append(Table(
-        [['']],
-        colWidths=[5.2*inch],
-        style=[('BACKGROUND', (0, 0), (-1, -1), HexColor('#e0f7ef')), ('BOTTOMPADDING', (0, 0), (-1, -1), 1)]
-    ))
-    story.append(Spacer(1, 3))
-    # Shrnutí
-    story.append(Paragraph("Shrnutí projektu", section_heading_style))
-    summary_data = [
-        ['Metrika', 'Hodnota'],
-        ['Celkové náklady', f"<b><font color='#059669'>{total_cost:,.0f} Kč</font></b>"],
-        ['Počet aktivit', f"<b>{len(selected_activities)}</b>"],
-        ['Průměrná cena na aktivitu', f"<b>{total_cost / len(selected_activities):,.0f} Kč</b>" if len(selected_activities) > 0 else "0 Kč"]
+        story.append(Spacer(1, 12))
+    story.append(Paragraph("Kalkulace soutěžního workshopu", title_style))
+    story.append(Paragraph("Profesionální report nákladů a aktivit", subtitle_style))
+    story.append(Spacer(1, 18))
+    callout_data = [
+        [Paragraph("Celkové náklady", callout_title), Paragraph("Počet aktivit", callout_title), Paragraph("Průměrná cena/aktivitu", callout_title)],
+        [Paragraph(f"{total_cost:,.0f} Kč", callout_value), Paragraph(f"{len(selected_activities)}", callout_value), Paragraph(f"{(total_cost/len(selected_activities)) if len(selected_activities)>0 else 0:,.0f} Kč", callout_value)]
     ]
-    summary_table = Table(summary_data, colWidths=[1.5*inch, 2.2*inch])
-    summary_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), HexColor('#e0f7ef')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#059669')),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), font_bold),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
-        ('BACKGROUND', (0, 1), (-1, -1), HexColor('#ffffff')),
-        ('GRID', (0, 0), (-1, -1), 0.3, HexColor('#e5e7eb')),
-        ('FONTNAME', (0, 1), (-1, -1), font_name),
-        ('FONTSIZE', (0, 1), (-1, -1), 8),
-        ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 4),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 4),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 3),
+    callout_table = Table(callout_data, colWidths=[1.7*inch, 1.7*inch, 1.7*inch])
+    callout_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), HexColor(light)),
+        ('BOX', (0, 0), (-1, -1), 1, HexColor(green)),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, HexColor(gray)),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
     ]))
-    story.append(summary_table)
-    story.append(Spacer(1, 6))
-    # Detailné sekcie
+    story.append(callout_table)
+    story.append(Spacer(1, 24))
+    # --- Sloupcový graf nákladov podľa fáz ---
     if len(selected_activities) > 0:
-        story.append(Paragraph("Detailní rozpis aktivit", section_heading_style))
-        phase_groups = selected_activities.groupby('Fáze')
-        for phase, phase_activities in phase_groups:
-            # Oddelenie sekcie pásikom
-            story.append(Spacer(1, 3))
+        phase_sums = selected_activities.groupby('Fáze')['Náklady'].sum()
+        fig, ax = plt.subplots(figsize=(5.5, 2.2))
+        bars = ax.bar(phase_sums.index, phase_sums.values, color=green, edgecolor=blue)
+        ax.set_title('Náklady podle fáze', fontsize=13, color=blue, pad=10)
+        ax.set_ylabel('Náklady (Kč)', fontsize=10)
+        ax.set_xticklabels(phase_sums.index, rotation=18, ha='right', fontsize=9)
+        ax.tick_params(axis='y', labelsize=9)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['left'].set_color(gray)
+        ax.spines['bottom'].set_color(gray)
+        plt.tight_layout()
+        img_buf = BytesIO()
+        plt.savefig(img_buf, format='png', bbox_inches='tight', dpi=160)
+        plt.close(fig)
+        img_buf.seek(0)
+        story.append(Image(img_buf, width=380, height=110))
+        story.append(Spacer(1, 18))
+    # --- Fázy a tabuľky ---
+    if len(selected_activities) > 0:
+        phase_names = list(selected_activities['Fáze'].unique())
+        for idx, phase in enumerate(phase_names):
+            phase_color = phase_colors[idx % len(phase_colors)]
+            phase_icon = phase_icons[idx % len(phase_icons)]
+            # Farebný pás s nadpisom a ikonou
             story.append(Table(
-                [['']],
+                [[Paragraph(f"{phase_icon} {phase}", phase_title_style)]],
                 colWidths=[5.2*inch],
-                style=[('BACKGROUND', (0, 0), (-1, -1), HexColor('#f3f4f6')), ('BOTTOMPADDING', (0, 0), (-1, -1), 1)]
+                style=[('BACKGROUND', (0, 0), (-1, -1), HexColor(phase_color)), ('LEFTPADDING', (0, 0), (-1, -1), 10), ('RIGHTPADDING', (0, 0), (-1, -1), 0), ('TOPPADDING', (0, 0), (-1, -1), 6), ('BOTTOMPADDING', (0, 0), (-1, -1), 6)]
             ))
-            story.append(Spacer(1, 2))
-            story.append(Paragraph(f"Fáze: {phase}", heading_style))
+            story.append(Spacer(1, 4))
+            # Infobox s kľúčovou metrikou fázy
+            phase_activities = selected_activities[selected_activities['Fáze'] == phase]
+            phase_total = phase_activities['Náklady'].sum()
+            infobox = Table(
+                [[Paragraph('Součet nákladů fáze', infobox_title)], [Paragraph(f'{phase_total:,.0f} Kč', infobox_value)]],
+                colWidths=[2.2*inch]
+            )
+            infobox.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), HexColor(green)),
+                ('BOX', (0, 0), (-1, -1), 1, HexColor(blue)),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            story.append(infobox)
+            story.append(Spacer(1, 6))
+            # Tabuľka aktivít
             table_data = [
                 [
-                    Paragraph('Aktivita', heading_style),
-                    Paragraph('Množství', heading_style),
-                    Paragraph('Cena za jednotku', heading_style),
-                    Paragraph('Náklady', heading_style),
-                    Paragraph('Poznámky', heading_style)
+                    Paragraph('Aktivita', table_header_style),
+                    Paragraph('Množství', table_header_style),
+                    Paragraph('Cena za jednotku', table_header_style),
+                    Paragraph('Náklady', table_header_style),
+                    Paragraph('Poznámky', table_header_style)
                 ]
             ]
             for _, activity in phase_activities.iterrows():
                 table_data.append([
-                    Paragraph(str(activity['Aktivita']), activity_style),
-                    Paragraph(f"{activity['Upravené množství']:.1f}", number_style),
-                    Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", number_style),
-                    Paragraph(f"{activity['Náklady']:,.0f} Kč", number_style),
-                    Paragraph(str(activity['Poznámky']) if pd.notna(activity['Poznámky']) else '', notes_style)
+                    Paragraph(str(activity['Aktivita']), table_cell_style),
+                    Paragraph(f"{activity['Upravené množství']:.1f}", table_number_style),
+                    Paragraph(f"{activity['Upravená cena za jednotku']:,.0f} Kč", table_number_style),
+                    Paragraph(f"{activity['Náklady']:,.0f} Kč", table_number_style),
+                    Paragraph(str(activity['Poznámky']) if pd.notna(activity['Poznámky']) else '', table_cell_style)
                 ])
-            phase_total = phase_activities['Náklady'].sum()
             table_data.append([
-                Paragraph('', normal_style),
-                Paragraph('', normal_style),
+                Paragraph('', table_cell_style),
+                Paragraph('', table_cell_style),
                 Paragraph('SOUČET FÁZE:', sum_style),
                 Paragraph(f"{phase_total:,.0f} Kč", sum_style),
-                Paragraph('', normal_style)
+                Paragraph('', table_cell_style)
             ])
             activity_table = Table(table_data, colWidths=[1.7*inch, 0.6*inch, 1.0*inch, 1.0*inch, 1.5*inch])
             table_style = [
-                ('BACKGROUND', (0, 0), (-1, 0), HexColor('#e0f7ef')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), HexColor('#059669')),
+                ('BACKGROUND', (0, 0), (-1, 0), HexColor(light)),
+                ('TEXTCOLOR', (0, 0), (-1, 0), HexColor(blue)),
                 ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), font_bold),
-                ('FONTSIZE', (0, 0), (-1, 0), 9),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
-                ('TOPPADDING', (0, 0), (-1, 0), 3),
-                ('GRID', (0, 0), (-1, -1), 0.3, HexColor('#e5e7eb')),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 5),
+                ('TOPPADDING', (0, 0), (-1, 0), 4),
+                ('GRID', (0, 0), (-1, -1), 0.3, HexColor(gray)),
                 ('VALIGN', (0, 0), (-1, -1), 'TOP'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 3),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 3),
             ]
-            # Pruhovať riadky decentne
             for i in range(1, len(table_data)-1):
                 if i % 2 == 0:
-                    table_style.append(('BACKGROUND', (0, i), (-1, i), HexColor('#f3f4f6')))
+                    table_style.append(('BACKGROUND', (0, i), (-1, i), HexColor('#F8F8F8')))
                 else:
-                    table_style.append(('BACKGROUND', (0, i), (-1, i), HexColor('#ffffff')))
-            # Súčet
+                    table_style.append(('BACKGROUND', (0, i), (-1, i), colors.white))
             table_style += [
-                ('BACKGROUND', (0, -1), (-1, -1), HexColor('#e0f7ef')),
+                ('BACKGROUND', (0, -1), (-1, -1), HexColor(light)),
                 ('FONTNAME', (0, -1), (-1, -1), font_bold),
-                ('TEXTCOLOR', (0, -1), (-1, -1), HexColor('#059669')),
-                ('FONTSIZE', (0, -1), (-1, -1), 9),
+                ('TEXTCOLOR', (0, -1), (-1, -1), HexColor(green)),
+                ('FONTSIZE', (0, -1), (-1, -1), 10),
                 ('ALIGN', (2, -1), (3, -1), 'RIGHT'),
-                ('LINEABOVE', (0, -1), (-1, -1), 0.7, HexColor('#059669')),
+                ('LINEABOVE', (0, -1), (-1, -1), 0.7, HexColor(green)),
             ]
             activity_table.setStyle(TableStyle(table_style))
             story.append(activity_table)
-            story.append(Spacer(1, 4))
-    # Vizualizácia nákladov
-    if len(selected_activities) > 0:
-        story.append(Paragraph("Vizualizace nákladů", section_heading_style))
-        story.append(Paragraph("Graf hierarchického rozložení nákladů je dostupný v interaktivní verzi aplikace.", normal_style))
-        story.append(Spacer(1, 4))
-    # Záver
-    story.append(Table(
-        [['']],
-        colWidths=[5.2*inch],
-        style=[('BACKGROUND', (0, 0), (-1, -1), HexColor('#e0f7ef')), ('BOTTOMPADDING', (0, 0), (-1, -1), 1)]
-    ))
-    story.append(Spacer(1, 3))
-    story.append(Paragraph("Závěr", section_heading_style))
-    story.append(Paragraph(f"Celkové náklady na soutěžní workshop činí <b><font color='#059669'>{total_cost:,.0f} Kč</font></b>.", normal_style))
-    story.append(Paragraph("Tento dokument byl automaticky vygenerován kalkulátorem soutěžního workshopu.", normal_style))
+            story.append(Spacer(1, 12))
     doc.build(story)
     buffer.seek(0)
     return buffer
