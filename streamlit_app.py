@@ -603,17 +603,14 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
     import os
-    import urllib.request
     font_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts')
-    os.makedirs(font_dir, exist_ok=True)
     dejavu_path = os.path.join(font_dir, 'DejaVuSans.ttf')
     dejavu_bold_path = os.path.join(font_dir, 'DejaVuSans-Bold.ttf')
-    if not os.path.exists(dejavu_path):
-        url = 'https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf'
-        urllib.request.urlretrieve(url, dejavu_path)
-    if not os.path.exists(dejavu_bold_path):
-        url = 'https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans-Bold.ttf'
-        urllib.request.urlretrieve(url, dejavu_bold_path)
+    if not os.path.exists(dejavu_path) or not os.path.exists(dejavu_bold_path):
+        raise FileNotFoundError(
+            f"Chýbajúci font! Nahrajte súbory 'DejaVuSans.ttf' a 'DejaVuSans-Bold.ttf' do priečinka 'fonts/' v repozitári. "
+            f"Cesty hľadaných súborov: {dejavu_path}, {dejavu_bold_path}"
+        )
     pdfmetrics.registerFont(TTFont('DejaVuSans', dejavu_path))
     pdfmetrics.registerFont(TTFont('DejaVuSans-Bold', dejavu_bold_path))
     font_name = 'DejaVuSans'
