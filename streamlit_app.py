@@ -599,10 +599,15 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
     
-    # Nastavení UTF-8 kódování pro české znaky
-    # Použijeme vstavané fonty s podporou UTF-8
+    # Registrácia fontu s podporou českej diakritiky
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    import os
+    font_path = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSans.ttf')
+    pdfmetrics.registerFont(TTFont('DejaVuSans', font_path))
+    font_name = 'DejaVuSans'
     
-    # Štýly s podporou českých znaků
+    # Štýly s podporou českých znakov
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'CustomTitle',
@@ -611,8 +616,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#059669'),
         alignment=TA_CENTER,
         spaceAfter=30,
-        fontName='Helvetica-Bold',
-        encoding='utf-8'
+        fontName=font_name,
     )
     heading_style = ParagraphStyle(
         'CustomHeading',
@@ -621,8 +625,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#10b981'),
         alignment=TA_LEFT,
         spaceAfter=12,
-        fontName='Helvetica-Bold',
-        encoding='utf-8'
+        fontName=font_name,
     )
     normal_style = ParagraphStyle(
         'CustomNormal',
@@ -631,8 +634,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         textColor=HexColor('#1e2937'),
         alignment=TA_LEFT,
         spaceAfter=6,
-        fontName='Helvetica',
-        encoding='utf-8'
+        fontName=font_name,
     )
     
     # Obsah dokumentu
@@ -645,7 +647,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
     story.append(Paragraph(f"Datum generování: {datetime.now().strftime('%d.%m.%Y %H:%M')}", normal_style))
     story.append(Spacer(1, 20))
     
-    # Sumár
+    # Shrnutí
     story.append(Paragraph("Shrnutí projektu", heading_style))
     summary_data = [
         ['Metrika', 'Hodnota'],
@@ -658,12 +660,12 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         ('BACKGROUND', (0, 0), (-1, 0), HexColor('#059669')),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 0), (-1, 0), font_name),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), HexColor('#f8fafc')),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTNAME', (0, 1), (-1, -1), font_name),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
         ('ALIGN', (0, 1), (-1, -1), 'LEFT'),
         ('LEFTPADDING', (0, 0), (-1, -1), 6),
@@ -705,19 +707,19 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
                 ('BACKGROUND', (0, 0), (-1, 0), HexColor('#10b981')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTNAME', (0, 0), (-1, 0), font_name),
                 ('FONTSIZE', (0, 0), (-1, 0), 10),
                 ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
                 ('BACKGROUND', (0, 1), (-1, -2), HexColor('#ffffff')),
                 ('BACKGROUND', (0, -1), (-1, -1), HexColor('#f3f4f6')),
                 ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-                ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                ('FONTNAME', (0, 1), (-1, -1), font_name),
                 ('FONTSIZE', (0, 1), (-1, -1), 9),
                 ('LEFTPADDING', (0, 0), (-1, -1), 4),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
                 ('TOPPADDING', (0, 0), (-1, -1), 4),
                 ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+                ('FONTNAME', (0, -1), (-1, -1), font_name),
                 ('FONTSIZE', (0, -1), (-1, -1), 10),
             ]))
             story.append(activity_table)
