@@ -14,6 +14,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
 import os
 import matplotlib.pyplot as plt
+import squarify
 
 # --- Najmodernejší vizuál a UX podľa svetových štandardov ---
 st.set_page_config(page_title="Kalkulátor soutěžního workshopu", page_icon="🏗️", layout="wide")
@@ -683,6 +684,38 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         plt.close(fig)
         img_buf.seek(0)
         story.append(Image(img_buf, width=380, height=110))
+        story.append(Spacer(1, 18))
+    # --- Timeline vizualizácia ---
+    if len(selected_activities) > 0:
+        phase_names = list(selected_activities['Fáze'].unique())
+        fig, ax = plt.subplots(figsize=(5.5, 0.9))
+        y = [0.5] * len(phase_names)
+        x = list(range(len(phase_names)))
+        ax.plot(x, y, color=blue, linewidth=2, zorder=1)
+        ax.scatter(x, y, color=green, s=180, zorder=2, edgecolor=blue, linewidth=2)
+        for i, phase in enumerate(phase_names):
+            ax.text(x[i], y[i]+0.13, phase, ha='center', va='bottom', fontsize=9, color=dark, fontweight='bold', rotation=0)
+        ax.axis('off')
+        plt.tight_layout()
+        timeline_buf = BytesIO()
+        plt.savefig(timeline_buf, format='png', bbox_inches='tight', dpi=160)
+        plt.close(fig)
+        timeline_buf.seek(0)
+        story.append(Paragraph('Průběh fází soutěže (timeline)', table_header_style))
+        story.append(Image(timeline_buf, width=380, height=40))
+        story.append(Spacer(1, 18))
+    # --- Treemap vizualizácia ---
+    if len(selected_activities) > 0:
+        phase_sums = selected_activities.groupby('Fáze')['Náklady'].sum()
+        fig = plt.figure(figsize=(5.5, 2.2))
+        squarify.plot(sizes=phase_sums.values, label=phase_sums.index, color=[green, blue, gray, light, '#50AF32', '#035DAA', '#B3B6B5'], alpha=0.8, text_kwargs={'fontsize':9, 'weight':'bold', 'color':'#fff'})
+        plt.axis('off')
+        plt.title('Podíly nákladů podle fází (treemap)', fontsize=11, color=blue, pad=8)
+        treemap_buf = BytesIO()
+        plt.savefig(treemap_buf, format='png', bbox_inches='tight', dpi=160)
+        plt.close(fig)
+        treemap_buf.seek(0)
+        story.append(Image(treemap_buf, width=380, height=110))
         story.append(Spacer(1, 18))
     # --- Fázy a tabuľky ---
     if len(selected_activities) > 0:
