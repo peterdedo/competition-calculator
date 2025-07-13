@@ -646,7 +646,7 @@ def generate_pdf_report(selected_activities, total_cost, variant, unit_type):
         story.append(img)
         story.append(Spacer(1, 24))
     story.append(Paragraph("Kalkulace soutěžního workshopu", title_style))
-    story.append(Paragraph("Profesionální report nákladů a aktivit", subtitle_style))
+    story.append(Paragraph("Report nákladů a aktivit", subtitle_style))
     story.append(Spacer(1, 30))
     callout_data = [
         [Paragraph("Celkové náklady", callout_title), Paragraph("Počet aktivit", callout_title), Paragraph("Průměrná cena/aktivitu", callout_title)],
